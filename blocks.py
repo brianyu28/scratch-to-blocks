@@ -2,11 +2,15 @@ import json
 import re
 import requests
 import sys
+import webbrowser
 
+from urllib.parse import quote
+
+OPEN_IN_BROWSER = True
 
 FIELDS = {
     "_mouse_": "mouse-pointer",
-    "_random_": "random position",
+    "_random_": "random position"
 }
 
 
@@ -27,7 +31,7 @@ BLOCKS = {
     "motion_changeyby": ("change y by {}", ["DY"]),
     "motion_sety": ("set y to {}", ["Y"]),
     "motion_ifonedgebounce": ("if on edge, bounce", []),
-    "motion_setrotationstyle": ("set rotation style [{} v]", [["STYLE", FIELDS]]),
+    "motion_setrotationstyle": ("set rotation style [{} v]", [["STYLE", {}]]),
 
     # Looks
     "looks_sayforsecs": ("say {} for {} seconds", ["MESSAGE", "SECS"]),
@@ -35,6 +39,18 @@ BLOCKS = {
     "looks_thinkforsecs": ("think {} for {} seconds", ["MESSAGE", "SECS"]),
     "looks_think": ("think {}", ["MESSAGE"]),
     "looks_switchcostumeto": ("switch costume to {}", ["COSTUME"]),
+    "looks_nextcostume": ("next costume", []),
+    "looks_switchbackdropto": ("switch backdrop to {}", ["BACKDROP"]),
+    "looks_nextbackdrop": ("next backdrop", []),
+    "looks_changesizeby": ("change size by {}", ["CHANGE"]),
+    "looks_setsizeto": ("set size to {} %", ["SIZE"]),
+    "looks_changeeffectby": ("change [{} v] effect by {}", [["EFFECT", {}], "CHANGE"]),
+    "looks_seteffectto": ("set [{} v] effect to {}", [["EFFECT", {}], "VALUE"]),
+    "looks_cleargraphiceffects": ("clear graphic effects", []),
+    "looks_show": ("show", []),
+    "looks_hide": ("hide", []),
+    "looks_gotofrontback": ("go to [{} v] layer", [["FRONT_BACK", {}]]),
+    "looks_goforwardbackwardlayers": ("go [{} v] {} layers", [["FORWARD_BACKWARD", {}], "NUM"]),
 
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
@@ -56,6 +72,7 @@ INPUTS = {
 
     # Looks
     "looks_costume": ("({} v)", [["COSTUME", {}]]),
+    "looks_backdrops": ("({} v)", [["BACKDROP", {}]]),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
@@ -150,7 +167,7 @@ def format_block(block_id, blocks, name, inputs):
         elif isinstance(input_name, list):
             field_name, mapping = input_name
             args.append(mapping.get(block["fields"][field_name][0],
-                                    block["fields"][field_name][0]))
+                                    block["fields"][field_name][0].lower()))
         else:
             raise Exception(f"unsupported block type {type(input_name)}")
     data = {
@@ -170,29 +187,32 @@ def format_input(block_id, blocks, name, inputs):
         elif isinstance(input_name, list):
             field_name, mapping = input_name
             args.append(mapping.get(block["fields"][field_name][0],
-                                    block["fields"][field_name][0]))
+                                    block["fields"][field_name][0].lower()))
         else:
             raise Exception(f"unsupported argument type {type(input_name)}")
     return name.format(*args)
 
 
-def print_blocks(scripts):
-    def print_indent(block, indent):
-        print(" " * indent, end="")
-        print(block["label"])
+def block_string(scripts):
+    def indent_string(block, indent):
+        output = " " * indent + block["label"] + "\n"
 
         # Print substack
         if "substack" in block:
-            print_indent(block["substack"], indent + 4)
-            print(" " * indent, end="")
-            print("end")
+            output += indent_string(block["substack"], indent + 4)
+            output += " " * indent + "end\n"
 
         # Print next block
         if "next" in block:
-            print_indent(block["next"], indent)
+            output += indent_string(block["next"], indent)
+
+        return output
+
+    output = ""
     for script in scripts:
-        print_indent(script, 0)
-        print()
+        output += indent_string(script, 0)
+        output += "\n"
+    return output
 
 
 def main():
@@ -212,7 +232,11 @@ def main():
 
     # Generate blocks
     blocks = generate_scratchblocks(data)
-    print_blocks(blocks)
+    text = block_string(blocks)
+    print(text)
+    if OPEN_IN_BROWSER:
+        quoted = quote(text)
+        webbrowser.open(f"http://scratchblocks.github.io/#?style=scratch3&script={quoted}")
 
 
 if __name__ == "__main__":
