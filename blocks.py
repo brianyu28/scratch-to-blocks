@@ -25,12 +25,24 @@ def generate_scratchblocks(project):
 
 def generate_script(block_id, blocks):
     block = blocks[block_id]
+    next_block = block["next"]
     opcode = block["opcode"]
-    try:
+    if opcode in BLOCKS:
         script = BLOCKS[opcode](block_id, blocks)
-    except KeyError:
-        return f"missing handler for {opcode}"
+    else:
+        return f"MISSING handler for {opcode}"
+    if next_block:
+        script["next"] = generate_script(next_block, blocks)
     return script
+
+
+def generate_input(input_block, blocks):
+    main_input = input_block[1]
+    identifier = main_input[0]
+    if identifier == 4: # number
+        return main_input[1]
+    else:
+        return f"MISSING handler for input type {identifier}"
 
 
 def block_noinput(name):
@@ -38,13 +50,35 @@ def block_noinput(name):
         block = blocks[block_id]
         next_block = block["next"]
         return {
-            "label": name,
-            "substack": None,
-            "next": generate_script(next_block, blocks) if next_block else None
+            "label": name
         }
     return f
 
+def block_inputs(name, inputs):
+    def f(block_id, blocks):
+        block = blocks[block_id]
+        args = [
+            generate_input(block["inputs"][input_name], blocks)
+            for input_name in inputs
+        ]
+        return {
+            "label": name.format(*args)
+        }
+    return f
+
+
+def print_blocks(scripts):
+    def print_indent(block, indent):
+        print(" " * indent, end="")
+        print(block["label"])
+        if "next" in block:
+            print_indent(block["next"], indent)
+    for script in scripts:
+        print_indent(script, 0)
+        print()
+
 BLOCKS = {
+    "motion_movesteps": block_inputs("move ({}) steps", ["STEPS"]),
     "event_whenflagclicked": block_noinput("when flag clicked")
 }
 
@@ -65,7 +99,7 @@ def main():
 
     # Generate blocks
     blocks = generate_scratchblocks(data)
-    print(blocks)
+    print_blocks(blocks)
 
 if __name__ == "__main__":
     main()
