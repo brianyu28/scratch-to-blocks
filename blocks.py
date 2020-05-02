@@ -10,6 +10,7 @@ BLOCKS = {
     "motion_movesteps": ("move ({}) steps", ["STEPS"]),
     "motion_turnright": ("turn right ({}) degrees", ["DEGREES"]),
     "motion_turnleft": ("turn left ({}) degrees", ["DEGREES"]),
+    "motion_goto": ("go to ({} v)", ["TO"]),
 
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
@@ -18,7 +19,14 @@ BLOCKS = {
     "control_repeat": ("repeat ({})", ["TIMES"]),
 }
 
+
 INPUTS = {
+    # Motion
+    "motion_goto_menu": ("{} v", [["TO", {
+        "_random_": "random position",
+        "_mouse_": "mouse pointer"
+    }]]),
+
     # Operators
     "operator_add": ("({}) + ({})", ["NUM1", "NUM2"]),
 }
@@ -52,7 +60,7 @@ def generate_script(block_id, blocks):
         name, inputs = BLOCKS[opcode]
         script = format_block(block_id, blocks, name, inputs)
     else:
-        return {"label": f"MISSING handler for {opcode}"}
+        raise Exception(f"MISSING handler for {opcode}")
 
     # Handle next block
     next_block = block["next"]
@@ -75,7 +83,7 @@ def generate_input(input_block, blocks):
     elif isinstance(main_input, list):
         return main_input[1]
     else:
-        return f"MISSING handler for input type {type(main_input)}"
+        raise Exception(f"Missing handler for input type {type(main_input)}")
 
 
 def generate_input_block(block_id, blocks):
@@ -87,7 +95,7 @@ def generate_input_block(block_id, blocks):
         input_block = format_input(block_id, blocks, name, inputs)
         return input_block
     else:
-        return f"MISSING handler for input {opcode}"
+        raise Exception(f"Missing handler for input {opcode}")
 
 
 def format_block(block_id, blocks, name, inputs):
@@ -107,10 +115,16 @@ def format_block(block_id, blocks, name, inputs):
 def format_input(block_id, blocks, name, inputs):
     block = blocks[block_id]
 
-    args = [
-        generate_input(block["inputs"][input_name], blocks)
-        for input_name in inputs
-    ]
+    args = []
+    for input_name in inputs:
+        if isinstance(input_name, str):
+            arg = generate_input(block["inputs"][input_name], blocks)
+            args.append(arg)
+        elif isinstance(input_name, list):
+            field_name, mapping = input_name
+            return mapping[block["fields"][field_name][0]]
+        else:
+            raise Exception(f"unsupported argument type {type(input_name)}")
     return name.format(*args)
 
 
