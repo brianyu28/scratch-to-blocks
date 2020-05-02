@@ -46,6 +46,9 @@ INPUTS = {
     "motion_goto_menu": ("{} v", [["TO", FIELDS]]),
     "motion_glideto_menu": ("{} v", [["TO", FIELDS]]),
     "motion_pointtowards_menu": ("{} v", [["TOWARDS", FIELDS]]),
+    "motion_xposition": ("(x position)", []),
+    "motion_yposition": ("(y position)", []),
+    "motion_direction": ("(direction)", []),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
@@ -67,7 +70,11 @@ def generate_scratchblocks(project):
     scripts = []
     for target in targets:
         for block_id, block in target["blocks"].items():
-            if isinstance(block, dict) and block["parent"] is None:
+            is_start = (
+                isinstance(block, dict) and block["parent"] is None
+                and block["opcode"] in BLOCKS
+            )
+            if is_start:
                 script = generate_script(block_id, target["blocks"])
                 scripts.append(script)
     return scripts
