@@ -7,9 +7,6 @@ import sys
 FIELDS = {
     "_mouse_": "mouse-pointer",
     "_random_": "random position",
-    "all around": "all around",
-    "don't rotate": "don't rotate",
-    "left-right": "left-right",
 }
 
 
@@ -32,6 +29,13 @@ BLOCKS = {
     "motion_ifonedgebounce": ("if on edge, bounce", []),
     "motion_setrotationstyle": ("set rotation style [{} v]", [["STYLE", FIELDS]]),
 
+    # Looks
+    "looks_sayforsecs": ("say {} for {} seconds", ["MESSAGE", "SECS"]),
+    "looks_say": ("say {}", ["MESSAGE"]),
+    "looks_thinkforsecs": ("think {} for {} seconds", ["MESSAGE", "SECS"]),
+    "looks_think": ("think {}", ["MESSAGE"]),
+    "looks_switchcostumeto": ("switch costume to {}", ["COSTUME"]),
+
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
 
@@ -49,6 +53,9 @@ INPUTS = {
     "motion_xposition": ("(x position)", []),
     "motion_yposition": ("(y position)", []),
     "motion_direction": ("(direction)", []),
+
+    # Looks
+    "looks_costume": ("({} v)", [["COSTUME", {}]]),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
@@ -142,7 +149,8 @@ def format_block(block_id, blocks, name, inputs):
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
-            args.append(mapping[block["fields"][field_name][0]])
+            args.append(mapping.get(block["fields"][field_name][0],
+                                    block["fields"][field_name][0]))
         else:
             raise Exception(f"unsupported block type {type(input_name)}")
     data = {
@@ -161,7 +169,8 @@ def format_input(block_id, blocks, name, inputs):
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
-            args.append(mapping[block["fields"][field_name][0]])
+            args.append(mapping.get(block["fields"][field_name][0],
+                                    block["fields"][field_name][0]))
         else:
             raise Exception(f"unsupported argument type {type(input_name)}")
     return name.format(*args)
