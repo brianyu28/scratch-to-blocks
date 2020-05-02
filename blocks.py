@@ -119,10 +119,14 @@ INPUTS = {
 
 def get_project_from_url(url):
     """Return project data for a URL."""
+
+    # Validate project URL
     match = re.search("scratch.mit.edu/projects/(\\d+)/", url)
     if match is None:
         return None
     project_id = match.group(1)
+
+    # Query for project JSON
     res = requests.get(f"https://projects.scratch.mit.edu/{project_id}")
     return res.json()
 
@@ -130,6 +134,8 @@ def get_project_from_url(url):
 def generate_scratchblocks(project):
     targets = project["targets"]
     scripts = []
+
+    # Check each target for a new script
     for target in targets:
         for block_id, block in target["blocks"].items():
             is_start = (
@@ -145,9 +151,13 @@ def generate_scratchblocks(project):
 def generate_script(block_id, blocks):
     block = blocks[block_id]
     opcode = block["opcode"]
+
+    # Format current block
     if opcode in BLOCKS:
         name, inputs = BLOCKS[opcode]
-        script = format_block(block_id, blocks, name, inputs)
+        script = {
+            "label": format_block(block_id, blocks, name, inputs)
+        }
     else:
         raise Exception(f"MISSING handler for {opcode}")
 
@@ -156,10 +166,11 @@ def generate_script(block_id, blocks):
     if next_block:
         script["next"] = generate_script(next_block, blocks)
 
-    # Handle substack
+    # Handle substacks
     if "SUBSTACK" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK"][1]
         script["substack"] = generate_script(substack_id, blocks)
+
     if "SUBSTACK2" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK2"][1]
         script["substack2"] = generate_script(substack_id, blocks)
@@ -170,8 +181,12 @@ def generate_script(block_id, blocks):
 def generate_input(input_block, blocks):
     """Generate input based on the value of INPUTS for a block."""
     main_input = input_block[1]
+
+    # Handle inputs that are references to other blocks
     if isinstance(main_input, str):
         return generate_input_block(main_input, blocks)
+
+    # Handle inputs that do not refer to other blocks
     elif isinstance(main_input, list):
         input_type = main_input[0]
         input_value = main_input[1]
@@ -190,7 +205,7 @@ def generate_input_block(block_id, blocks):
     opcode = block["opcode"]
     if opcode in INPUTS:
         name, inputs = INPUTS[opcode]
-        input_block = format_input(block_id, blocks, name, inputs)
+        input_block = format_block(block_id, blocks, name, inputs)
         return input_block
     else:
         raise Exception(f"Missing handler for input {opcode}")
@@ -210,25 +225,6 @@ def format_block(block_id, blocks, name, inputs):
             args.append(get_field_name(mapping, block, field_name))
         else:
             raise Exception(f"unsupported block type {type(input_name)}")
-    data = {
-        "label": name.format(*args)
-    }
-    return data
-
-
-def format_input(block_id, blocks, name, inputs):
-    block = blocks[block_id]
-
-    args = []
-    for input_name in inputs:
-        if isinstance(input_name, str):
-            arg = generate_input(block["inputs"][input_name], blocks)
-            args.append(arg)
-        elif isinstance(input_name, list):
-            field_name, mapping = input_name
-            args.append(get_field_name(mapping, block, field_name))
-        else:
-            raise Exception(f"unsupported argument type {type(input_name)}")
     return name.format(*args)
 
 
