@@ -14,7 +14,6 @@ FIELDS = {
     "PAN": "pan left/right",
 }
 
-
 BLOCKS = {
 
     # Motion
@@ -87,7 +86,6 @@ BLOCKS = {
     # My Blocks
     # TODO: My Blocks incomplete.
 }
-
 
 INPUTS = {
     # Motion
