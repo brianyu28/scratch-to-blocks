@@ -18,6 +18,11 @@ BLOCKS = {
     "control_repeat": ("repeat ({})", ["TIMES"]),
 }
 
+INPUTS = {
+    # Operators
+    "operator_add": ("({}) + ({})", ["NUM1", "NUM2"]),
+}
+
 
 def get_project_from_url(url):
     """Return project data for a URL."""
@@ -63,12 +68,26 @@ def generate_script(block_id, blocks):
 
 
 def generate_input(input_block, blocks):
+    """Generate input based on the value of INPUTS for a block."""
     main_input = input_block[1]
-    identifier = main_input[0]
-    if identifier in [4, 5, 6, 7, 8]:  # number
+    if isinstance(main_input, str):
+        return generate_input_block(main_input, blocks)
+    elif isinstance(main_input, list):
         return main_input[1]
     else:
-        return f"MISSING handler for input type {identifier}"
+        return f"MISSING handler for input type {type(main_input)}"
+
+
+def generate_input_block(block_id, blocks):
+    """Generate the value of an input reporter."""
+    block = blocks[block_id]
+    opcode = block["opcode"]
+    if opcode in INPUTS:
+        name, inputs = INPUTS[opcode]
+        input_block = format_input(block_id, blocks, name, inputs)
+        return input_block
+    else:
+        return f"MISSING handler for input {opcode}"
 
 
 def format_block(block_id, blocks, name, inputs):
@@ -83,6 +102,16 @@ def format_block(block_id, blocks, name, inputs):
         "label": name.format(*args)
     }
     return data
+
+
+def format_input(block_id, blocks, name, inputs):
+    block = blocks[block_id]
+
+    args = [
+        generate_input(block["inputs"][input_name], blocks)
+        for input_name in inputs
+    ]
+    return name.format(*args)
 
 
 def print_blocks(scripts):
