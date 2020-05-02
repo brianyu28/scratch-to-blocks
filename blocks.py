@@ -3,14 +3,28 @@ import re
 import requests
 import sys
 
+
+BLOCKS = {
+
+    # Motion
+    "motion_movesteps": ("move ({}) steps", ["STEPS"]),
+    "motion_turnright": ("turn right ({}) degrees", ["DEGREES"]),
+    "motion_turnleft": ("turn left ({}) degrees", ["DEGREES"]),
+
+    # Events
+    "event_whenflagclicked": ("when flag clicked", []),
+}
+
+
 def get_project_from_url(url):
     """Return project data for a URL."""
-    match = re.search("scratch.mit.edu/projects/(\d+)/", url)
+    match = re.search("scratch.mit.edu/projects/(\\d+)/", url)
     if match is None:
         return None
     project_id = match.group(1)
-    data = requests.get(f"https://projects.scratch.mit.edu/{project_id}").json()
-    return data
+    res = requests.get(f"https://projects.scratch.mit.edu/{project_id}")
+    return res.json()
+
 
 def generate_scratchblocks(project):
     targets = project["targets"]
@@ -25,46 +39,47 @@ def generate_scratchblocks(project):
 
 def generate_script(block_id, blocks):
     block = blocks[block_id]
-    next_block = block["next"]
     opcode = block["opcode"]
     if opcode in BLOCKS:
-        script = BLOCKS[opcode](block_id, blocks)
+        name, inputs = BLOCKS[opcode]
+        script = format_block(block_id, blocks, name, inputs)
     else:
-        return f"MISSING handler for {opcode}"
+        return {"label": f"MISSING handler for {opcode}"}
+
+    # Handle next block
+    next_block = block["next"]
     if next_block:
         script["next"] = generate_script(next_block, blocks)
+
+    # Handle substack
+    if "SUBSTACK" in block["inputs"]:
+        substack_id = block["inputs"]["SUBSTACK"][1]
+        script["substack"] = generate_script(substack_id, blocks)
+
     return script
 
 
 def generate_input(input_block, blocks):
     main_input = input_block[1]
     identifier = main_input[0]
-    if identifier == 4: # number
+    if identifier == 4:  # number
         return main_input[1]
     else:
         return f"MISSING handler for input type {identifier}"
 
 
-def block_noinput(name):
-    def f(block_id, blocks):
-        block = blocks[block_id]
-        next_block = block["next"]
-        return {
-            "label": name
-        }
-    return f
+def format_block(block_id, blocks, name, inputs):
+    block = blocks[block_id]
 
-def block_inputs(name, inputs):
-    def f(block_id, blocks):
-        block = blocks[block_id]
-        args = [
-            generate_input(block["inputs"][input_name], blocks)
-            for input_name in inputs
-        ]
-        return {
-            "label": name.format(*args)
-        }
-    return f
+    # Generate inputs for block
+    args = [
+        generate_input(block["inputs"][input_name], blocks)
+        for input_name in inputs
+    ]
+    data = {
+        "label": name.format(*args)
+    }
+    return data
 
 
 def print_blocks(scripts):
@@ -77,10 +92,6 @@ def print_blocks(scripts):
         print_indent(script, 0)
         print()
 
-BLOCKS = {
-    "motion_movesteps": block_inputs("move ({}) steps", ["STEPS"]),
-    "event_whenflagclicked": block_noinput("when flag clicked")
-}
 
 def main():
 
@@ -100,6 +111,7 @@ def main():
     # Generate blocks
     blocks = generate_scratchblocks(data)
     print_blocks(blocks)
+
 
 if __name__ == "__main__":
     main()
