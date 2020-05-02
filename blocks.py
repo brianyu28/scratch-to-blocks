@@ -13,6 +13,9 @@ BLOCKS = {
 
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
+
+    # Control
+    "control_repeat": ("repeat ({})", ["TIMES"]),
 }
 
 
@@ -62,7 +65,7 @@ def generate_script(block_id, blocks):
 def generate_input(input_block, blocks):
     main_input = input_block[1]
     identifier = main_input[0]
-    if identifier == 4:  # number
+    if identifier in [4, 5, 6, 7, 8]:  # number
         return main_input[1]
     else:
         return f"MISSING handler for input type {identifier}"
@@ -86,6 +89,14 @@ def print_blocks(scripts):
     def print_indent(block, indent):
         print(" " * indent, end="")
         print(block["label"])
+
+        # Print substack
+        if "substack" in block:
+            print_indent(block["substack"], indent + 4)
+            print(" " * indent, end="")
+            print("end")
+
+        # Print next block
         if "next" in block:
             print_indent(block["next"], indent)
     for script in scripts:
