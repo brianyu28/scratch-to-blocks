@@ -67,12 +67,25 @@ BLOCKS = {
     "event_whenflagclicked": ("when flag clicked", []),
     "event_whenkeypressed": ("when [{} v] key pressed", [["KEY_OPTION", {}]]),
     "event_whenthisspriteclicked": ("when this sprite clicked", []),
-    # TODO: Events section incomplete.
+    # TODO: Events blocks incomplete.
 
     # Control
     "control_repeat": ("repeat {}", ["TIMES"]),
     "control_if": ("if {} then", ["CONDITION"]),
     "control_if_else": ("if {} then", ["CONDITION"]),
+    # TODO: Control blocks incomplete.
+
+    # Sensing
+    # Sensing blocks incomplete.
+
+    # Operations
+    # TODO: Operations blocks incomplete.
+
+    # Variables
+    # TODO: Variable blocks incomplete.
+
+    # My Blocks
+    # TODO: My Blocks incomplete.
 }
 
 
