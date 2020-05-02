@@ -65,9 +65,14 @@ BLOCKS = {
 
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
+    "event_whenkeypressed": ("when [{} v] key pressed", [["KEY_OPTION", {}]]),
+    "event_whenthisspriteclicked": ("when this sprite clicked", []),
+    # TODO: Events section incomplete.
 
     # Control
     "control_repeat": ("repeat {}", ["TIMES"]),
+    "control_if": ("if {} then", ["CONDITION"]),
+    "control_if_else": ("if {} then", ["CONDITION"]),
 }
 
 
@@ -91,6 +96,9 @@ INPUTS = {
     # Sound
     "sound_sounds_menu": ("({} v)", [["SOUND_MENU", {"attrs": ["preservecase"]}]]),
     "sound_volume": ("(volume)", []),
+
+    # Sensing
+    "sensing_mousedown": ("<mouse down?>", []),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
@@ -140,6 +148,9 @@ def generate_script(block_id, blocks):
     if "SUBSTACK" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK"][1]
         script["substack"] = generate_script(substack_id, blocks)
+    if "SUBSTACK2" in block["inputs"]:
+        substack_id = block["inputs"]["SUBSTACK2"][1]
+        script["substack2"] = generate_script(substack_id, blocks)
 
     return script
 
@@ -226,6 +237,9 @@ def block_string(scripts):
         # Print substack
         if "substack" in block:
             output += indent_string(block["substack"], indent + 4)
+            if "substack2" in block:
+                output += " " * indent + "else\n"
+                output += indent_string(block["substack2"], indent + 4)
             output += " " * indent + "end\n"
 
         # Print next block
