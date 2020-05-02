@@ -10,8 +10,9 @@ BLOCKS = {
     "motion_movesteps": ("move ({}) steps", ["STEPS"]),
     "motion_turnright": ("turn right ({}) degrees", ["DEGREES"]),
     "motion_turnleft": ("turn left ({}) degrees", ["DEGREES"]),
-    "motion_goto": ("go to ({} v)", ["TO"]),
+    "motion_goto": ("go to ({})", ["TO"]),
     "motion_gotoxy": ("go to x: ({}) y: ({})", ["X", "Y"]),
+    "motion_glideto": ("glide ({}) secs to ({})", ["SECS", "TO"]),
 
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
@@ -21,12 +22,16 @@ BLOCKS = {
 }
 
 
+FIELDS = {
+    "_mouse_": "mouse-pointer",
+    "_random_": "random position",
+}
+
+
 INPUTS = {
     # Motion
-    "motion_goto_menu": ("{} v", [["TO", {
-        "_random_": "random position",
-        "_mouse_": "mouse pointer"
-    }]]),
+    "motion_goto_menu": ("{} v", [["TO", FIELDS]]),
+    "motion_glideto_menu": ("{} v", [["TO", FIELDS]]),
 
     # Operators
     "operator_add": ("({}) + ({})", ["NUM1", "NUM2"]),
@@ -123,7 +128,7 @@ def format_input(block_id, blocks, name, inputs):
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
-            return mapping[block["fields"][field_name][0]]
+            args.append(mapping[block["fields"][field_name][0]])
         else:
             raise Exception(f"unsupported argument type {type(input_name)}")
     return name.format(*args)
