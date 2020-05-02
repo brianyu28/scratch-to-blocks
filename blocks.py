@@ -73,6 +73,9 @@ INPUTS = {
     # Looks
     "looks_costume": ("({} v)", [["COSTUME", {}]]),
     "looks_backdrops": ("({} v)", [["BACKDROP", {}]]),
+    "looks_costumenumbername": ("(costume [{} v])", [["NUMBER_NAME", {}]]),
+    "looks_backdropnumbername": ("(backdrop [{} v])", [["NUMBER_NAME", {}]]),
+    "looks_size": ("(size)", []),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
