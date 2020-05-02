@@ -10,7 +10,8 @@ OPEN_IN_BROWSER = True
 
 FIELDS = {
     "_mouse_": "mouse-pointer",
-    "_random_": "random position"
+    "_random_": "random position",
+    "PAN": "pan left/right",
 }
 
 
@@ -52,6 +53,16 @@ BLOCKS = {
     "looks_gotofrontback": ("go to [{} v] layer", [["FRONT_BACK", {}]]),
     "looks_goforwardbackwardlayers": ("go [{} v] {} layers", [["FORWARD_BACKWARD", {}], "NUM"]),
 
+    # Sound
+    "sound_playuntildone": ("play sound {} until done", ["SOUND_MENU"]),
+    "sound_play": ("start sound {}", ["SOUND_MENU"]),
+    "sound_stopallsounds": ("stop all sounds", []),
+    "sound_changeeffectby": ("change [{} v] effect by {}", [["EFFECT", FIELDS], "VALUE"]),
+    "sound_seteffectto": ("set [{} v] effect to {}", [["EFFECT", FIELDS], "VALUE"]),
+    "sound_cleareffects": ("clear sound effects", []),
+    "sound_changevolumeby": ("change volume by {}", ["VOLUME"]),
+    "sound_setvolumeto": ("set volume to {} %", ["VOLUME"]),
+
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
 
@@ -63,9 +74,9 @@ BLOCKS = {
 
 INPUTS = {
     # Motion
-    "motion_goto_menu": ("{} v", [["TO", FIELDS]]),
-    "motion_glideto_menu": ("{} v", [["TO", FIELDS]]),
-    "motion_pointtowards_menu": ("{} v", [["TOWARDS", FIELDS]]),
+    "motion_goto_menu": ("({} v)", [["TO", FIELDS]]),
+    "motion_glideto_menu": ("({} v)", [["TO", FIELDS]]),
+    "motion_pointtowards_menu": ("({} v)", [["TOWARDS", FIELDS]]),
     "motion_xposition": ("(x position)", []),
     "motion_yposition": ("(y position)", []),
     "motion_direction": ("(direction)", []),
@@ -76,6 +87,10 @@ INPUTS = {
     "looks_costumenumbername": ("(costume [{} v])", [["NUMBER_NAME", {}]]),
     "looks_backdropnumbername": ("(backdrop [{} v])", [["NUMBER_NAME", {}]]),
     "looks_size": ("(size)", []),
+
+    # Sound
+    "sound_sounds_menu": ("({} v)", [["SOUND_MENU", {"attrs": ["preservecase"]}]]),
+    "sound_volume": ("(volume)", []),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
@@ -169,8 +184,7 @@ def format_block(block_id, blocks, name, inputs):
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
-            args.append(mapping.get(block["fields"][field_name][0],
-                                    block["fields"][field_name][0].lower()))
+            args.append(get_field_name(mapping, block, field_name))
         else:
             raise Exception(f"unsupported block type {type(input_name)}")
     data = {
@@ -189,11 +203,20 @@ def format_input(block_id, blocks, name, inputs):
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
-            args.append(mapping.get(block["fields"][field_name][0],
-                                    block["fields"][field_name][0].lower()))
+            args.append(get_field_name(mapping, block, field_name))
         else:
             raise Exception(f"unsupported argument type {type(input_name)}")
     return name.format(*args)
+
+
+def get_field_name(mapping, block, field_name):
+    value = block["fields"][field_name][0]
+    if mapping.get(value):
+        return mapping.get(value)
+    elif "preservecase" in mapping.get("attrs", []):
+        return value
+    else:
+        return value.lower()
 
 
 def block_string(scripts):
