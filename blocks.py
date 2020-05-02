@@ -89,7 +89,6 @@ BLOCKS = {
 }
 
 
-
 INPUTS = {
     # Motion
     "motion_goto_menu": ("({} v)", [["TO", FIELDS]]),
@@ -288,8 +287,9 @@ def main():
     text = block_string(blocks)
     print(text)
     if OPEN_IN_BROWSER:
-        quoted = quote(text)
-        webbrowser.open(f"http://scratchblocks.github.io/#?style=scratch3&script={quoted}")
+        data = quote(text)
+        url = f"http://scratchblocks.github.io/#?style=scratch3&script={data}"
+        webbrowser.open(url)
 
 
 if __name__ == "__main__":
