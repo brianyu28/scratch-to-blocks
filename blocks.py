@@ -4,37 +4,51 @@ import requests
 import sys
 
 
+FIELDS = {
+    "_mouse_": "mouse-pointer",
+    "_random_": "random position",
+    "all around": "all around",
+    "don't rotate": "don't rotate",
+    "left-right": "left-right",
+}
+
+
 BLOCKS = {
 
     # Motion
-    "motion_movesteps": ("move ({}) steps", ["STEPS"]),
-    "motion_turnright": ("turn right ({}) degrees", ["DEGREES"]),
-    "motion_turnleft": ("turn left ({}) degrees", ["DEGREES"]),
-    "motion_goto": ("go to ({})", ["TO"]),
-    "motion_gotoxy": ("go to x: ({}) y: ({})", ["X", "Y"]),
-    "motion_glideto": ("glide ({}) secs to ({})", ["SECS", "TO"]),
+    "motion_movesteps": ("move {} steps", ["STEPS"]),
+    "motion_turnright": ("turn right {} degrees", ["DEGREES"]),
+    "motion_turnleft": ("turn left {} degrees", ["DEGREES"]),
+    "motion_goto": ("go to {}", ["TO"]),
+    "motion_gotoxy": ("go to x: {} y: {}", ["X", "Y"]),
+    "motion_glideto": ("glide {} secs to {}", ["SECS", "TO"]),
+    "motion_glidesecstoxy": ("glide {} secs to x: {} y: {}", ["SECS", "X", "Y"]),
+    "motion_pointindirection": ("point in direction {}", ["DIRECTION"]),
+    "motion_pointtowards": ("point towards {}", ["TOWARDS"]),
+    "motion_changexby": ("change x by {}", ["DX"]),
+    "motion_setx": ("set x to {}", ["X"]),
+    "motion_changeyby": ("change y by {}", ["DY"]),
+    "motion_sety": ("set y to {}", ["Y"]),
+    "motion_ifonedgebounce": ("if on edge, bounce", []),
+    "motion_setrotationstyle": ("set rotation style [{} v]", [["STYLE", FIELDS]]),
 
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
 
     # Control
-    "control_repeat": ("repeat ({})", ["TIMES"]),
+    "control_repeat": ("repeat {}", ["TIMES"]),
 }
 
-
-FIELDS = {
-    "_mouse_": "mouse-pointer",
-    "_random_": "random position",
-}
 
 
 INPUTS = {
     # Motion
     "motion_goto_menu": ("{} v", [["TO", FIELDS]]),
     "motion_glideto_menu": ("{} v", [["TO", FIELDS]]),
+    "motion_pointtowards_menu": ("{} v", [["TOWARDS", FIELDS]]),
 
     # Operators
-    "operator_add": ("({}) + ({})", ["NUM1", "NUM2"]),
+    "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
 }
 
 
@@ -53,7 +67,7 @@ def generate_scratchblocks(project):
     scripts = []
     for target in targets:
         for block_id, block in target["blocks"].items():
-            if block["parent"] is None:
+            if isinstance(block, dict) and block["parent"] is None:
                 script = generate_script(block_id, target["blocks"])
                 scripts.append(script)
     return scripts
@@ -87,7 +101,13 @@ def generate_input(input_block, blocks):
     if isinstance(main_input, str):
         return generate_input_block(main_input, blocks)
     elif isinstance(main_input, list):
-        return main_input[1]
+        input_type = main_input[0]
+        input_value = main_input[1]
+        if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
+            return f"({input_value})"
+        elif input_type in [10, 11]:  # string, broadcast
+            return f"[{input_value}]"
+
     else:
         raise Exception(f"Missing handler for input type {type(main_input)}")
 
@@ -108,10 +128,16 @@ def format_block(block_id, blocks, name, inputs):
     block = blocks[block_id]
 
     # Generate inputs for block
-    args = [
-        generate_input(block["inputs"][input_name], blocks)
-        for input_name in inputs
-    ]
+    args = []
+    for input_name in inputs:
+        if isinstance(input_name, str):
+            arg = generate_input(block["inputs"][input_name], blocks)
+            args.append(arg)
+        elif isinstance(input_name, list):
+            field_name, mapping = input_name
+            args.append(mapping[block["fields"][field_name][0]])
+        else:
+            raise Exception(f"unsupported block type {type(input_name)}")
     data = {
         "label": name.format(*args)
     }
