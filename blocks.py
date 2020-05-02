@@ -11,6 +11,7 @@ BLOCKS = {
     "motion_turnright": ("turn right ({}) degrees", ["DEGREES"]),
     "motion_turnleft": ("turn left ({}) degrees", ["DEGREES"]),
     "motion_goto": ("go to ({} v)", ["TO"]),
+    "motion_gotoxy": ("go to x: ({}) y: ({})", ["X", "Y"]),
 
     # Events
     "event_whenflagclicked": ("when flag clicked", []),
