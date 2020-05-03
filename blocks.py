@@ -66,16 +66,50 @@ BLOCKS = {
     "event_whenflagclicked": ("when flag clicked", []),
     "event_whenkeypressed": ("when [{} v] key pressed", [["KEY_OPTION", {}]]),
     "event_whenthisspriteclicked": ("when this sprite clicked", []),
-    # TODO: Events blocks incomplete.
+    "event_whenbackdropswitchesto": ("when backdrop switches to [{} v]", [["BACKDROP", {}]]), 
+    "event_whengreaterthan": ("when [{} v] > {}", [["WHENGREATERTHANMENU", FIELDS], "VALUE"]),
+    "event_whenbroadcastreceived":("when I receive [{} v]", [["BROADCAST_OPTION", {}]]),
+    # check these two
+    "event_broadcast": ("broadcast {}", ["BROADCAST_INPUT"]),
+    "event_broadcastandwait": ("broadcast {} and wait", ["BROADCAST_INPUT"]),
 
     # Control
+    "control_wait": ("wait {} seconds", ["DURATION"]),
     "control_repeat": ("repeat {}", ["TIMES"]),
     "control_if": ("if {} then", ["CONDITION"]),
     "control_if_else": ("if {} then", ["CONDITION"]),
-    # TODO: Control blocks incomplete.
+    "control_forever": ("forever", []),
+    "control_repeat_until": ("repeat until {}", ["CONDITION"]),
+    "control_stop": ("stop [{} v]", [["STOP_OPTION", {}]]),
+    "control_start_as_clone": ("when I start as a clone", []),
+    "control_create_clone_of": ("create clone of {}", ["CLONE_OPTION"]),
+    "control_delete_this_clone": ("delete this clone", []),
+    "control_wait_until": ("wait until {}", ["CONDITION"]),
+
 
     # Sensing
-    # Sensing blocks incomplete.
+    # "sensing_touchingobject":
+    # "sensing_touchingobjectmenu":
+    # "sensing_touchingcolor":
+    # "sensing_coloristouchingcolor":
+    # "sensing_distanceto":
+    # "sensing_distancetomenu":
+    # "sensing_keypressed":
+    # "sensing_keyoptions":
+    # "sensing_mousex":
+    # "sensing_mousey":
+    # "sensing_setdragmode":
+    # "sensing_loudness":
+    # "sensing_timer":
+    # "sensing_resettimer": 
+    # "sensing_of":
+    # "sensing_of_object_menu":
+    # "sensing_current": 
+    # "sensing_dayssince2000":
+    # "sensing_username":
+    # "sensing_askandwait": 
+    # "sensing_answer":
+
 
     # Operations
     # TODO: Operations blocks incomplete.
@@ -107,11 +141,31 @@ INPUTS = {
     "sound_sounds_menu": ("({} v)", [["SOUND_MENU", {"attrs": ["preservecase"]}]]),
     "sound_volume": ("(volume)", []),
 
+    # Control -- check this block
+    "control_create_clone_of_menu":("({} v)", [["CLONE_OPTION", FIELDS]]),
     # Sensing
     "sensing_mousedown": ("<mouse down?>", []),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
+    "operator_subtract": ("({} - {})", ["NUM1", "NUM2"]),
+    "operator_equals": ("<{} = {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_random": ("(pick random {} to {})", ["FROM", "TO"]),
+    "operator_gt": ("<{} > {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_lt": ("<{} < {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_and": ("<{} and {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_round": ("(round {})", ["NUM"]),
+    "operator_mathop": ("([{} v] of {} )", [["OPERATOR", FIELDS], "NUM"]),
+    "operator_or": ("<{} or {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_not": ("<not {}>", ["OPERAND"]),
+    "operator_join": ("(join {} {})", ["STRING1", "STRING2"]),
+    "operator_letter_of": ("(letter {} of {}", ["LETTER", "STRING"]),
+    "operator_length": ("(length of {})", ["STRING"]),
+    "operator_contains": ("< {} contains {}?>", ["STRING1", "STRING2"]),
+    "operator_mod": ("({} mod {})", ["NUM1", "NUM2"]),
+    "operator_multiply": ("({} * {})", ["NUM1", "NUM2"]),
+    "operator_divide": ("({} / {})", ["NUM1", "NUM2"]),
+
 }
 
 
@@ -121,6 +175,7 @@ def get_project_from_url(url):
     # Validate project URL
     match = re.search("scratch.mit.edu/projects/(\\d+)/", url)
     if match is None:
+        print("darn it")
         return None
     project_id = match.group(1)
 
@@ -136,6 +191,7 @@ def generate_scratchblocks(project):
     # Check each target for a new script
     for target in targets:
         for block_id, block in target["blocks"].items():
+            #print("block", block_id, block)
             is_start = (
                 isinstance(block, dict) and block["parent"] is None
                 and block["opcode"] in BLOCKS
@@ -143,13 +199,14 @@ def generate_scratchblocks(project):
             if is_start:
                 script = generate_script(block_id, target["blocks"])
                 scripts.append(script)
+    #print("scripts", scripts)
     return scripts
 
 
 def generate_script(block_id, blocks):
     block = blocks[block_id]
     opcode = block["opcode"]
-
+    print("HERE", block, opcode, blocks)
     # Format current block
     if opcode in BLOCKS:
         name, inputs = BLOCKS[opcode]
@@ -201,9 +258,11 @@ def generate_input_block(block_id, blocks):
     """Generate the value of an input reporter."""
     block = blocks[block_id]
     opcode = block["opcode"]
+    print("OPCODE", opcode)
     if opcode in INPUTS:
         name, inputs = INPUTS[opcode]
         input_block = format_block(block_id, blocks, name, inputs)
+        print("INPUTS,", input_block)
         return input_block
     else:
         raise Exception(f"Missing handler for input {opcode}")
@@ -271,6 +330,7 @@ def main():
     else:
         url = input("Scratch Project URL: ")
 
+    print("URL", url)
     # Download project data
     data = get_project_from_url(url)
     if data is None:
