@@ -88,34 +88,20 @@ BLOCKS = {
 
 
     # Sensing
-    # "sensing_touchingobject":
-    # "sensing_touchingobjectmenu":
-    # "sensing_touchingcolor":
-    # "sensing_coloristouchingcolor":
-    # "sensing_distanceto":
-    # "sensing_distancetomenu":
-    # "sensing_keypressed":
-    # "sensing_keyoptions":
-    # "sensing_mousex":
-    # "sensing_mousey":
-    # "sensing_setdragmode":
-    # "sensing_loudness":
-    # "sensing_timer":
-    # "sensing_resettimer": 
-    # "sensing_of":
-    # "sensing_of_object_menu":
-    # "sensing_current": 
-    # "sensing_dayssince2000":
-    # "sensing_username":
-    # "sensing_askandwait": 
-    # "sensing_answer":
-
-
-    # Operations
-    # TODO: Operations blocks incomplete.
+    "sensing_askandwait": ("ask {} and wait", ["QUESTION"]),
+    "sensing_setdragmode": ("set drag mode [{} v]", [["DRAG_MODE", FIELDS]]),
+    "sensing_resettimer": ("reset timer", []),
+    
 
     # Variables
-    # TODO: Variable blocks incomplete.
+    "data_variable": ("({})", ["VARIABLE"]),
+    "data_setvariableto": ("set [{} v] to {}", [["VARIABLE", FIELDS], "VALUE"]),
+    "data_changevariableby": ("change [{} v] by {}", [["VARIABLE", FIELDS], "VALUE"]),
+    "data_hidevariable": ("show variable [{} v]", [["VARIABLE", FIELDS]]),
+    "data_showvariable": ("hide variable [{} v]", [["VARIABLE", FIELDS]]),
+
+    # Lists
+    # TODO
 
     # My Blocks
     # TODO: My Blocks incomplete.
@@ -143,8 +129,27 @@ INPUTS = {
 
     # Control -- check this block
     "control_create_clone_of_menu":("({} v)", [["CLONE_OPTION", FIELDS]]),
+    
     # Sensing
     "sensing_mousedown": ("<mouse down?>", []),
+    "sensing_touchingobject": ("<touching [{} v]?>", ["TOUCHINGOBJECTMENU"]),
+    "sensing_touchingobjectmenu": ("{}", [["TOUCHINGOBJECTMENU", FIELDS]]),
+    "sensing_touchingcolor": ("<touching color {}?>", ["COLOR"]),
+    "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR1", "COLOR2"]),
+    "sensing_distanceto": ("(distance to [{} v])", ["DISTANCETOMENU"]),
+    "sensing_distancetomenu": ("{}", [["DISTANCETOMENU", FIELDS]]),
+    "sensing_keypressed": ("<key [{} v] pressed?>", ["KEY_OPTION"]),
+    "sensing_keyoptions": ("{}", [["KEY_OPTION", FIELDS]]),
+    "sensing_mousex": ("(mouse x)", []),
+    "sensing_mousey": ("(mouse y)", []),
+    "sensing_loudness": ("(loudness)", []),
+    "sensing_timer": ("(timer)", []),
+    "sensing_of": ("([{} v] of {})", [["PROPERTY", FIELDS], "OBJECT"]),
+    "sensing_of_object_menu": ("[{} v]", [["OBJECT", FIELDS]]),
+    "sensing_current": ("(current [{} v])", [["CURRENTMENU", FIELDS]]),
+    "sensing_dayssince2000": ("(days since 2000)", []),
+    "sensing_username": ("(username)", []),
+    "sensing_answer": ("(answer)", []),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
