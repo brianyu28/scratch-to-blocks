@@ -101,10 +101,20 @@ BLOCKS = {
     "data_showvariable": ("hide variable [{} v]", [["VARIABLE", FIELDS]]),
 
     # Lists
-    # TODO
+    "data_listcontents": ("<[{} v] contains {} >", [["LIST", FIELDS], "ITEM"]),
+    "data_addtolist": ("add {} to [{} v]", ["ITEM", ["LIST", FIELDS]]),
+    "data_deleteoflist": ("delete {} of [{} v]", ["INDEX", ["LIST", FIELDS]]),
+    "data_deletealloflist": ("delete all of [{} v]", [["LIST", FIELDS]]),
+    "data_insertatlist": ("insert {} at {} of [{} v] ", ["ITEM", "INDEX", ["LIST", FIELDS]]),
+    "data_replaceitemoflist": ("replace item {} of [{} v] with {}", ["INDEX", ["LIST", FIELDS], "ITEM"]),
+    "data_hidelist": ("show list [{} v]", [["LIST", FIELDS]]),
+    "data_showlist": ("hide list [{} v]", [["LIST", FIELDS]]),
 
     # My Blocks
     # TODO: My Blocks incomplete.
+    "procedures_definition": ("define {}", ["custom_block"]),
+    #"procedures_prototype": ("define {}", ["custom_block"]),
+    #"procedures_call": ("call ", []),
 }
 
 INPUTS = {
@@ -171,6 +181,12 @@ INPUTS = {
     "operator_multiply": ("({} * {})", ["NUM1", "NUM2"]),
     "operator_divide": ("({} / {})", ["NUM1", "NUM2"]),
 
+    # List
+    "data_itemoflist": ("(item {} of [{} v])", ["INDEX", ["LIST", FIELDS]]),
+    "data_itemnumoflist": ("(item # of {} in [{} v])", ["ITEM", ["LIST", FIELDS]]),
+    "data_lengthoflist": ("(length of [{} v])", [["LIST", FIELDS]]),
+    "data_listcontainsitem": ("<[{} v] contains {}?", [["LIST", FIELDS], "ITEM"]),
+
 }
 
 
@@ -180,7 +196,6 @@ def get_project_from_url(url):
     # Validate project URL
     match = re.search("scratch.mit.edu/projects/(\\d+)/", url)
     if match is None:
-        print("darn it")
         return None
     project_id = match.group(1)
 
@@ -196,7 +211,6 @@ def generate_scratchblocks(project):
     # Check each target for a new script
     for target in targets:
         for block_id, block in target["blocks"].items():
-            #print("block", block_id, block)
             is_start = (
                 isinstance(block, dict) and block["parent"] is None
                 and block["opcode"] in BLOCKS
@@ -204,14 +218,12 @@ def generate_scratchblocks(project):
             if is_start:
                 script = generate_script(block_id, target["blocks"])
                 scripts.append(script)
-    #print("scripts", scripts)
     return scripts
 
 
 def generate_script(block_id, blocks):
     block = blocks[block_id]
     opcode = block["opcode"]
-    print("HERE", block, opcode, blocks)
     # Format current block
     if opcode in BLOCKS:
         name, inputs = BLOCKS[opcode]
@@ -263,11 +275,9 @@ def generate_input_block(block_id, blocks):
     """Generate the value of an input reporter."""
     block = blocks[block_id]
     opcode = block["opcode"]
-    print("OPCODE", opcode)
     if opcode in INPUTS:
         name, inputs = INPUTS[opcode]
         input_block = format_block(block_id, blocks, name, inputs)
-        print("INPUTS,", input_block)
         return input_block
     else:
         raise Exception(f"Missing handler for input {opcode}")
@@ -334,8 +344,6 @@ def main():
         url = sys.argv[1]
     else:
         url = input("Scratch Project URL: ")
-
-    print("URL", url)
     # Download project data
     data = get_project_from_url(url)
     if data is None:
