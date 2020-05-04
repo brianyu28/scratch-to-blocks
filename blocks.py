@@ -66,25 +66,55 @@ BLOCKS = {
     "event_whenflagclicked": ("when flag clicked", []),
     "event_whenkeypressed": ("when [{} v] key pressed", [["KEY_OPTION", {}]]),
     "event_whenthisspriteclicked": ("when this sprite clicked", []),
-    # TODO: Events blocks incomplete.
+    "event_whenbackdropswitchesto": ("when backdrop switches to [{} v]", [["BACKDROP", {}]]), 
+    "event_whengreaterthan": ("when [{} v] > {}", [["WHENGREATERTHANMENU", FIELDS], "VALUE"]),
+    "event_whenbroadcastreceived":("when I receive [{} v]", [["BROADCAST_OPTION", {}]]),
+    # check these two
+    "event_broadcast": ("broadcast {}", ["BROADCAST_INPUT"]),
+    "event_broadcastandwait": ("broadcast {} and wait", ["BROADCAST_INPUT"]),
 
     # Control
+    "control_wait": ("wait {} seconds", ["DURATION"]),
     "control_repeat": ("repeat {}", ["TIMES"]),
     "control_if": ("if {} then", ["CONDITION"]),
     "control_if_else": ("if {} then", ["CONDITION"]),
-    # TODO: Control blocks incomplete.
+    "control_forever": ("forever", []),
+    "control_repeat_until": ("repeat until {}", ["CONDITION"]),
+    "control_stop": ("stop [{} v]", [["STOP_OPTION", {}]]),
+    "control_start_as_clone": ("when I start as a clone", []),
+    "control_create_clone_of": ("create clone of {}", ["CLONE_OPTION"]),
+    "control_delete_this_clone": ("delete this clone", []),
+    "control_wait_until": ("wait until {}", ["CONDITION"]),
+
 
     # Sensing
-    # Sensing blocks incomplete.
-
-    # Operations
-    # TODO: Operations blocks incomplete.
+    "sensing_askandwait": ("ask {} and wait", ["QUESTION"]),
+    "sensing_setdragmode": ("set drag mode [{} v]", [["DRAG_MODE", FIELDS]]),
+    "sensing_resettimer": ("reset timer", []),
+    
 
     # Variables
-    # TODO: Variable blocks incomplete.
+    "data_variable": ("({})", ["VARIABLE"]),
+    "data_setvariableto": ("set [{} v] to {}", [["VARIABLE", FIELDS], "VALUE"]),
+    "data_changevariableby": ("change [{} v] by {}", [["VARIABLE", FIELDS], "VALUE"]),
+    "data_hidevariable": ("show variable [{} v]", [["VARIABLE", FIELDS]]),
+    "data_showvariable": ("hide variable [{} v]", [["VARIABLE", FIELDS]]),
+
+    # Lists
+    "data_listcontents": ("<[{} v] contains {} >", [["LIST", FIELDS], "ITEM"]),
+    "data_addtolist": ("add {} to [{} v]", ["ITEM", ["LIST", FIELDS]]),
+    "data_deleteoflist": ("delete {} of [{} v]", ["INDEX", ["LIST", FIELDS]]),
+    "data_deletealloflist": ("delete all of [{} v]", [["LIST", FIELDS]]),
+    "data_insertatlist": ("insert {} at {} of [{} v] ", ["ITEM", "INDEX", ["LIST", FIELDS]]),
+    "data_replaceitemoflist": ("replace item {} of [{} v] with {}", ["INDEX", ["LIST", FIELDS], "ITEM"]),
+    "data_hidelist": ("show list [{} v]", [["LIST", FIELDS]]),
+    "data_showlist": ("hide list [{} v]", [["LIST", FIELDS]]),
 
     # My Blocks
     # TODO: My Blocks incomplete.
+    "procedures_definition": ("define {}", ["custom_block"]),
+    #"procedures_prototype": ("define {}", ["custom_block"]),
+    #"procedures_call": ("call ", []),
 }
 
 INPUTS = {
@@ -107,11 +137,56 @@ INPUTS = {
     "sound_sounds_menu": ("({} v)", [["SOUND_MENU", {"attrs": ["preservecase"]}]]),
     "sound_volume": ("(volume)", []),
 
+    # Control -- check this block
+    "control_create_clone_of_menu":("({} v)", [["CLONE_OPTION", FIELDS]]),
+    
     # Sensing
     "sensing_mousedown": ("<mouse down?>", []),
+    "sensing_touchingobject": ("<touching [{} v]?>", ["TOUCHINGOBJECTMENU"]),
+    "sensing_touchingobjectmenu": ("{}", [["TOUCHINGOBJECTMENU", FIELDS]]),
+    "sensing_touchingcolor": ("<touching color {}?>", ["COLOR"]),
+    "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR1", "COLOR2"]),
+    "sensing_distanceto": ("(distance to [{} v])", ["DISTANCETOMENU"]),
+    "sensing_distancetomenu": ("{}", [["DISTANCETOMENU", FIELDS]]),
+    "sensing_keypressed": ("<key [{} v] pressed?>", ["KEY_OPTION"]),
+    "sensing_keyoptions": ("{}", [["KEY_OPTION", FIELDS]]),
+    "sensing_mousex": ("(mouse x)", []),
+    "sensing_mousey": ("(mouse y)", []),
+    "sensing_loudness": ("(loudness)", []),
+    "sensing_timer": ("(timer)", []),
+    "sensing_of": ("([{} v] of {})", [["PROPERTY", FIELDS], "OBJECT"]),
+    "sensing_of_object_menu": ("[{} v]", [["OBJECT", FIELDS]]),
+    "sensing_current": ("(current [{} v])", [["CURRENTMENU", FIELDS]]),
+    "sensing_dayssince2000": ("(days since 2000)", []),
+    "sensing_username": ("(username)", []),
+    "sensing_answer": ("(answer)", []),
 
     # Operators
     "operator_add": ("({} + {})", ["NUM1", "NUM2"]),
+    "operator_subtract": ("({} - {})", ["NUM1", "NUM2"]),
+    "operator_equals": ("<{} = {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_random": ("(pick random {} to {})", ["FROM", "TO"]),
+    "operator_gt": ("<{} > {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_lt": ("<{} < {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_and": ("<{} and {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_round": ("(round {})", ["NUM"]),
+    "operator_mathop": ("([{} v] of {} )", [["OPERATOR", FIELDS], "NUM"]),
+    "operator_or": ("<{} or {}>", ["OPERAND1", "OPERAND2"]),
+    "operator_not": ("<not {}>", ["OPERAND"]),
+    "operator_join": ("(join {} {})", ["STRING1", "STRING2"]),
+    "operator_letter_of": ("(letter {} of {}", ["LETTER", "STRING"]),
+    "operator_length": ("(length of {})", ["STRING"]),
+    "operator_contains": ("< {} contains {}?>", ["STRING1", "STRING2"]),
+    "operator_mod": ("({} mod {})", ["NUM1", "NUM2"]),
+    "operator_multiply": ("({} * {})", ["NUM1", "NUM2"]),
+    "operator_divide": ("({} / {})", ["NUM1", "NUM2"]),
+
+    # List
+    "data_itemoflist": ("(item {} of [{} v])", ["INDEX", ["LIST", FIELDS]]),
+    "data_itemnumoflist": ("(item # of {} in [{} v])", ["ITEM", ["LIST", FIELDS]]),
+    "data_lengthoflist": ("(length of [{} v])", [["LIST", FIELDS]]),
+    "data_listcontainsitem": ("<[{} v] contains {}?", [["LIST", FIELDS], "ITEM"]),
+
 }
 
 
@@ -149,7 +224,6 @@ def generate_scratchblocks(project):
 def generate_script(block_id, blocks):
     block = blocks[block_id]
     opcode = block["opcode"]
-
     # Format current block
     if opcode in BLOCKS:
         name, inputs = BLOCKS[opcode]
@@ -270,7 +344,6 @@ def main():
         url = sys.argv[1]
     else:
         url = input("Scratch Project URL: ")
-
     # Download project data
     data = get_project_from_url(url)
     if data is None:
