@@ -66,7 +66,7 @@ BLOCKS = {
     "event_whenflagclicked": ("when flag clicked", []),
     "event_whenkeypressed": ("when [{} v] key pressed", [["KEY_OPTION", {}]]),
     "event_whenthisspriteclicked": ("when this sprite clicked", []),
-    "event_whenbackdropswitchesto": ("when backdrop switches to [{} v]", [["BACKDROP", {}]]), 
+    "event_whenbackdropswitchesto": ("when backdrop switches to [{} v]", [["BACKDROP", {}]]),
     "event_whengreaterthan": ("when [{} v] > {}", [["WHENGREATERTHANMENU", FIELDS], "VALUE"]),
     "event_whenbroadcastreceived":("when I receive [{} v]", [["BROADCAST_OPTION", {}]]),
     # check these two
@@ -91,14 +91,14 @@ BLOCKS = {
     "sensing_askandwait": ("ask {} and wait", ["QUESTION"]),
     "sensing_setdragmode": ("set drag mode [{} v]", [["DRAG_MODE", FIELDS]]),
     "sensing_resettimer": ("reset timer", []),
-    
+
 
     # Variables
     "data_variable": ("({})", ["VARIABLE"]),
     "data_setvariableto": ("set [{} v] to {}", [["VARIABLE", FIELDS], "VALUE"]),
     "data_changevariableby": ("change [{} v] by {}", [["VARIABLE", FIELDS], "VALUE"]),
-    "data_hidevariable": ("show variable [{} v]", [["VARIABLE", FIELDS]]),
-    "data_showvariable": ("hide variable [{} v]", [["VARIABLE", FIELDS]]),
+    "data_hidevariable": ("hide variable [{} v]", [["VARIABLE", FIELDS]]),
+    "data_showvariable": ("show variable [{} v]", [["VARIABLE", FIELDS]]),
 
     # Lists
     "data_listcontents": ("<[{} v] contains {} >", [["LIST", FIELDS], "ITEM"]),
@@ -139,7 +139,7 @@ INPUTS = {
 
     # Control -- check this block
     "control_create_clone_of_menu":("({} v)", [["CLONE_OPTION", FIELDS]]),
-    
+
     # Sensing
     "sensing_mousedown": ("<mouse down?>", []),
     "sensing_touchingobject": ("<touching [{} v]?>", ["TOUCHINGOBJECTMENU"]),
@@ -185,7 +185,7 @@ INPUTS = {
     "data_itemoflist": ("(item {} of [{} v])", ["INDEX", ["LIST", FIELDS]]),
     "data_itemnumoflist": ("(item # of {} in [{} v])", ["ITEM", ["LIST", FIELDS]]),
     "data_lengthoflist": ("(length of [{} v])", [["LIST", FIELDS]]),
-    "data_listcontainsitem": ("<[{} v] contains {}?", [["LIST", FIELDS], "ITEM"]),
+    "data_listcontainsitem": ("<[{} v] contains {}?>", [["LIST", FIELDS], "ITEM"]),
 
 }
 
