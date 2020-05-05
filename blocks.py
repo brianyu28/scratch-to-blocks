@@ -8,6 +8,18 @@ from urllib.parse import quote
 
 OPEN_IN_BROWSER = True
 
+
+def custom_block(block):
+    """Formatting for a custom My Block"""
+    proccode = block["mutation"]["proccode"].replace("%s", "{}").replace("%b", "{}")
+    placeholders = re.findall("%[sb]", block["mutation"]["proccode"])
+    inputs = json.loads(block["mutation"]["argumentids"])
+    for i, input_id in enumerate(inputs):
+        if input_id not in block["inputs"]:
+            block["inputs"][input_id] = [1, [10, ""]] if placeholders[i] == "%s" else [1, ["BOOL", ""]]
+    return proccode, inputs
+
+
 FIELDS = {
     "_mouse_": "mouse-pointer",
     "_random_": "random position",
@@ -66,9 +78,9 @@ BLOCKS = {
     "event_whenflagclicked": ("when flag clicked", []),
     "event_whenkeypressed": ("when [{} v] key pressed", [["KEY_OPTION", {}]]),
     "event_whenthisspriteclicked": ("when this sprite clicked", []),
-    "event_whenbackdropswitchesto": ("when backdrop switches to [{} v]", [["BACKDROP", {}]]), 
+    "event_whenbackdropswitchesto": ("when backdrop switches to [{} v]", [["BACKDROP", {}]]),
     "event_whengreaterthan": ("when [{} v] > {}", [["WHENGREATERTHANMENU", FIELDS], "VALUE"]),
-    "event_whenbroadcastreceived":("when I receive [{} v]", [["BROADCAST_OPTION", {}]]),
+    "event_whenbroadcastreceived": ("when I receive [{} v]", [["BROADCAST_OPTION", {}]]),
     # check these two
     "event_broadcast": ("broadcast {}", ["BROADCAST_INPUT"]),
     "event_broadcastandwait": ("broadcast {} and wait", ["BROADCAST_INPUT"]),
@@ -91,14 +103,14 @@ BLOCKS = {
     "sensing_askandwait": ("ask {} and wait", ["QUESTION"]),
     "sensing_setdragmode": ("set drag mode [{} v]", [["DRAG_MODE", FIELDS]]),
     "sensing_resettimer": ("reset timer", []),
-    
+
 
     # Variables
     "data_variable": ("({})", ["VARIABLE"]),
     "data_setvariableto": ("set [{} v] to {}", [["VARIABLE", FIELDS], "VALUE"]),
     "data_changevariableby": ("change [{} v] by {}", [["VARIABLE", FIELDS], "VALUE"]),
-    "data_hidevariable": ("show variable [{} v]", [["VARIABLE", FIELDS]]),
-    "data_showvariable": ("hide variable [{} v]", [["VARIABLE", FIELDS]]),
+    "data_hidevariable": ("hide variable [{} v]", [["VARIABLE", FIELDS]]),
+    "data_showvariable": ("show variable [{} v]", [["VARIABLE", FIELDS]]),
 
     # Lists
     "data_listcontents": ("<[{} v] contains {} >", [["LIST", FIELDS], "ITEM"]),
@@ -111,10 +123,8 @@ BLOCKS = {
     "data_showlist": ("hide list [{} v]", [["LIST", FIELDS]]),
 
     # My Blocks
-    # TODO: My Blocks incomplete.
     "procedures_definition": ("define {}", ["custom_block"]),
-    #"procedures_prototype": ("define {}", ["custom_block"]),
-    #"procedures_call": ("call ", []),
+    "procedures_call": custom_block,
 }
 
 INPUTS = {
@@ -138,8 +148,8 @@ INPUTS = {
     "sound_volume": ("(volume)", []),
 
     # Control -- check this block
-    "control_create_clone_of_menu":("({} v)", [["CLONE_OPTION", FIELDS]]),
-    
+    "control_create_clone_of_menu": ("({} v)", [["CLONE_OPTION", FIELDS]]),
+
     # Sensing
     "sensing_mousedown": ("<mouse down?>", []),
     "sensing_touchingobject": ("<touching [{} v]?>", ["TOUCHINGOBJECTMENU"]),
@@ -185,8 +195,12 @@ INPUTS = {
     "data_itemoflist": ("(item {} of [{} v])", ["INDEX", ["LIST", FIELDS]]),
     "data_itemnumoflist": ("(item # of {} in [{} v])", ["ITEM", ["LIST", FIELDS]]),
     "data_lengthoflist": ("(length of [{} v])", [["LIST", FIELDS]]),
-    "data_listcontainsitem": ("<[{} v] contains {}?", [["LIST", FIELDS], "ITEM"]),
+    "data_listcontainsitem": ("<[{} v] contains {}?>", [["LIST", FIELDS], "ITEM"]),
 
+    # My Blocks
+    "procedures_prototype": custom_block,
+    "argument_reporter_boolean": ("<{}>", [["VALUE", {}]]),
+    "argument_reporter_string_number": ("({})", [["VALUE", {}]]),
 }
 
 
@@ -226,9 +240,14 @@ def generate_script(block_id, blocks):
     opcode = block["opcode"]
     # Format current block
     if opcode in BLOCKS:
-        name, inputs = BLOCKS[opcode]
+        block_structure = BLOCKS[opcode]
+        if callable(block_structure):
+            name, inputs = block_structure(block)
+        else:
+            name, inputs = block_structure
+        label = format_block(block_id, blocks, name, inputs)
         script = {
-            "label": format_block(block_id, blocks, name, inputs)
+            "label": label
         }
     else:
         raise Exception(f"MISSING handler for {opcode}")
@@ -266,6 +285,8 @@ def generate_input(input_block, blocks):
             return f"({input_value})"
         elif input_type in [10, 11]:  # string, broadcast
             return f"[{input_value}]"
+        elif input_type == "BOOL":
+            return f"<{input_value}>"
 
     else:
         raise Exception(f"Missing handler for input type {type(main_input)}")
@@ -276,7 +297,11 @@ def generate_input_block(block_id, blocks):
     block = blocks[block_id]
     opcode = block["opcode"]
     if opcode in INPUTS:
-        name, inputs = INPUTS[opcode]
+        block_structure = INPUTS[opcode]
+        if callable(block_structure):
+            name, inputs = block_structure(block)
+        else:
+            name, inputs = block_structure
         input_block = format_block(block_id, blocks, name, inputs)
         return input_block
     else:
