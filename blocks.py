@@ -219,6 +219,14 @@ def get_project_from_url(url):
 
 
 def generate_scratchblocks(project):
+    """Generates all blocks in a project.
+    
+    Args:
+        project (dict): the Scratch project to process.
+
+    Returns:
+        A list of scripts in the project that can be turned into text.
+    """
     targets = project["targets"]
     scripts = []
 
@@ -230,14 +238,30 @@ def generate_scratchblocks(project):
                 and block["opcode"] in BLOCKS
             )
             if is_start:
-                script = generate_script(block_id, target["blocks"])
+                script = generate_script(block_id, target["blocks"], target["blocks"])
                 scripts.append(script)
     return scripts
 
 
-def generate_script(block_id, blocks):
+def generate_script(block_id, block_ids, blocks):
+    """Generates a script.
+    
+    Args:
+        block_id (str): the start block.
+        block_ids (array-like): the set of block IDs that are allowed to be added.
+        blocks (array-like): the list of blocks within this target.
+    
+    Returns:
+        A dictionary with the nesting of this script as appropriate.
+    """
+
+    # If the current block isn't allowed, we're not adding it.
+    if block_id not in block_ids:
+        return None
+
     block = blocks[block_id]
     opcode = block["opcode"]
+
     # Format current block
     if opcode in BLOCKS:
         block_structure = BLOCKS[opcode]
@@ -254,17 +278,17 @@ def generate_script(block_id, blocks):
 
     # Handle next block
     next_block = block["next"]
-    if next_block:
-        script["next"] = generate_script(next_block, blocks)
+    if next_block in block_ids:
+        script["next"] = generate_script(next_block, block_ids, blocks)
 
     # Handle substacks
     if "SUBSTACK" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK"][1]
-        script["substack"] = generate_script(substack_id, blocks)
+        script["substack"] = generate_script(substack_id, block_ids, blocks)
 
     if "SUBSTACK2" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK2"][1]
-        script["substack2"] = generate_script(substack_id, blocks)
+        script["substack2"] = generate_script(substack_id, block_ids, blocks)
 
     return script
 
@@ -337,6 +361,10 @@ def get_field_name(mapping, block, field_name):
 
 def block_string(scripts):
     def indent_string(block, indent):
+        # If block isn't allowed, we just ignore it.
+        if block is None:
+            return ""
+
         output = " " * indent + block["label"] + "\n"
 
         # Print substack
@@ -361,7 +389,6 @@ def block_string(scripts):
 
 
 def main():
-
     # Get Scratch project URL
     if len(sys.argv) > 2:
         sys.exit("Usage: python blocks.py SCRATCH_PROJECT_URL")
@@ -385,4 +412,17 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    with open("full.json") as f:
+        data = json.load(f)
+
+    # Sample usage -- these are grabbed from the tests of get_surrounding_blocks.
+    scripts = [generate_script("Aui.NpK5Cs_obawNI4{c", ["Aui.NpK5Cs_obawNI4{c", "[f|hsFZ%vg~}7{C}=*%5", "CupN)`F`z1tugXtDqYzj", "G+C7yL/-O.6MH2V,f@DG", "(Psor|t+4_@pna[eo4{0"], data["targets"][1]["blocks"])]
+    
+    # Sample usage of the entire project:
+    #scripts = generate_scratchblocks(data)
+    
+    text = block_string(scripts)
+    if OPEN_IN_BROWSER:
+        data = quote(text)
+        url = f"http://scratchblocks.github.io/#?style=scratch3&script={data}"
+        webbrowser.open(url)
