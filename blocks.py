@@ -238,22 +238,27 @@ def generate_scratchblocks(project):
                 and block["opcode"] in BLOCKS
             )
             if is_start:
-                script = generate_script(block_id, target["blocks"], target["blocks"])
+                script = generate_script(block_id, target["blocks"])
                 scripts.append(script)
     return scripts
 
 
-def generate_script(block_id, block_ids, blocks):
+def generate_script(block_id, blocks, block_ids=None):
     """Generates a script.
     
     Args:
         block_id (str): the start block.
-        block_ids (array-like): the set of block IDs that are allowed to be added.
         blocks (array-like): the list of blocks within this target.
+        block_ids (array-like) (optional): the set of block IDs that are allowed to be added.
+            If not set, then all blocks are allowed.
     
     Returns:
         A dictionary with the nesting of this script as appropriate.
     """
+
+    # If we just want everything
+    if block_ids is None:
+        block_ids = blocks
 
     # If the current block isn't allowed, we're not adding it.
     if block_id not in block_ids:
@@ -279,16 +284,16 @@ def generate_script(block_id, block_ids, blocks):
     # Handle next block
     next_block = block["next"]
     if next_block in block_ids:
-        script["next"] = generate_script(next_block, block_ids, blocks)
+        script["next"] = generate_script(next_block, blocks, block_ids)
 
     # Handle substacks
     if "SUBSTACK" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK"][1]
-        script["substack"] = generate_script(substack_id, block_ids, blocks)
+        script["substack"] = generate_script(substack_id, blocks, block_ids)
 
     if "SUBSTACK2" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK2"][1]
-        script["substack2"] = generate_script(substack_id, block_ids, blocks)
+        script["substack2"] = generate_script(substack_id, blocks, block_ids)
 
     return script
 
@@ -416,10 +421,10 @@ if __name__ == "__main__":
         data = json.load(f)
 
     # Sample usage -- these are grabbed from the tests of get_surrounding_blocks.
-    scripts = [generate_script("Aui.NpK5Cs_obawNI4{c", ["Aui.NpK5Cs_obawNI4{c", "[f|hsFZ%vg~}7{C}=*%5", "CupN)`F`z1tugXtDqYzj", "G+C7yL/-O.6MH2V,f@DG", "(Psor|t+4_@pna[eo4{0"], data["targets"][1]["blocks"])]
+    #scripts = [generate_script("Aui.NpK5Cs_obawNI4{c", data["targets"][1]["blocks"], ["Aui.NpK5Cs_obawNI4{c", "[f|hsFZ%vg~}7{C}=*%5", "CupN)`F`z1tugXtDqYzj", "G+C7yL/-O.6MH2V,f@DG", "(Psor|t+4_@pna[eo4{0"])]
     
     # Sample usage of the entire project:
-    #scripts = generate_scratchblocks(data)
+    scripts = generate_scratchblocks(data)
     
     text = block_string(scripts)
     if OPEN_IN_BROWSER:
