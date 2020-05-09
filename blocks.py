@@ -417,17 +417,4 @@ def main():
 
 
 if __name__ == "__main__":
-    with open("full.json") as f:
-        data = json.load(f)
-
-    # Sample usage -- these are grabbed from the tests of get_surrounding_blocks.
-    #scripts = [generate_script("Aui.NpK5Cs_obawNI4{c", data["targets"][1]["blocks"], ["Aui.NpK5Cs_obawNI4{c", "[f|hsFZ%vg~}7{C}=*%5", "CupN)`F`z1tugXtDqYzj", "G+C7yL/-O.6MH2V,f@DG", "(Psor|t+4_@pna[eo4{0"])]
-    
-    # Sample usage of the entire project:
-    scripts = generate_scratchblocks(data)
-    
-    text = block_string(scripts)
-    if OPEN_IN_BROWSER:
-        data = quote(text)
-        url = f"http://scratchblocks.github.io/#?style=scratch3&script={data}"
-        webbrowser.open(url)
+    main()
