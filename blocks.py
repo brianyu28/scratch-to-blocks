@@ -125,6 +125,39 @@ BLOCKS = {
     # My Blocks
     "procedures_definition": ("define {}", ["custom_block"]),
     "procedures_call": custom_block,
+
+    # Pen
+    "pen_clear": ("erase all", []),
+    "pen_stamp": ("stamp", []),
+    "pen_penDown": ("pen down", []),
+    "pen_penUp": ("pen up", []),
+    "pen_setPenColorToColor": ("set pen color to {}", ["COLOR"]),
+    "pen_changePenColorParamBy": ("change pen ({} v) by {}", ["COLOR_PARAM", "VALUE"]),
+    "pen_setPenColorParamTo": ("set pen ({} v) to {}", ["COLOR_PARAM", "VALUE"]),
+    "pen_changePenSizeBy": ("change pen size by {}", ["SIZE"]),
+    "pen_setPenSizeTo": ("set pen size to {}", ["SIZE"]),
+
+    # Music
+    "music_playDrumForBeats": ("play drum ({} v) for {} beats", ["DRUM", "BEATS"]),
+    "music_restForBeats": ("rest for {} beats", ["BEATS"]),
+    "music_playNoteForBeats": ("play note ({}) for {} beats", ["NOTE", "BEATS"]), 
+    "music_setInstrument": ("set instrument to ({} v)", ["INSTRUMENT"]),
+    "music_setTempo": ("set tempo to {}", ["TEMPO"]),
+    "music_changeTempo": ("change tempo by {}", ["TEMPO"]),
+
+    # Video
+    "videoSensing_whenMotionGreaterThan": ("when video motion > {}", ["REFERENCE"]),
+    "videoSensing_videoToggle": ("turn video ({} v)", ["VIDEO_STATE"]),
+    "videoSensing_setVideoTransparency": ("set video transparency to {}", ["TRANSPARENCY"]),
+
+    # Text to Speech
+    "text2speech_speakAndWait": ("speak {}", ["WORDS"]),
+    "text2speech_setVoice": ("set voice to ({} v)", ["VOICE"]),
+    "text2speech_setLanguage": ("set language to ({} v)", ["LANGUAGE"]),
+
+    # Translate
+    "translate_getTranslate": ("translate {} to ({} v)", ["WORDS", "LANGUAGE"]),
+
 }
 
 INPUTS = {
@@ -201,6 +234,29 @@ INPUTS = {
     "procedures_prototype": custom_block,
     "argument_reporter_boolean": ("<{}>", [["VALUE", {}]]),
     "argument_reporter_string_number": ("({})", [["VALUE", {}]]),
+
+    # Pen
+    "pen_menu_colorParam": ("{}", [["colorParam", FIELDS]]),
+
+    # Music
+    "music_menu_DRUM": ("{}", [["DRUM", FIELDS]]),
+    "note": ("{}", [["NOTE", FIELDS]]),
+    "music_menu_INSTRUMENT": ("{}", [["INSTRUMENT", FIELDS]]),
+    "music_getTempo": ("(tempo)", []),
+
+    # Video
+    "videoSensing_menu_VIDEO_STATE": ("{}", [["VIDEO_STATE", FIELDS]]),
+    "videoSensing_videoOn": ("(video ({} v) on ({} v))", ["ATTRIBUTE", "SUBJECT"]),
+    "videoSensing_menu_ATTRIBUTE": ("{}", [["ATTRIBUTE", FIELDS]]),
+    "videoSensing_menu_SUBJECT": ("{}", [["SUBJECT", FIELDS]]),
+
+    # Text to Speech
+    "text2speech_menu_voices": ("{}", [["voices", FIELDS]]),
+    "text2speech_menu_languages": ("{}", [["languages", FIELDS]]),
+
+    # Translate
+    "translate_menu_languages": ("{}", [["languages", FIELDS]]),
+    "translate_getViewerLanguage": ("language", []),
 }
 
 
@@ -219,6 +275,14 @@ def get_project_from_url(url):
 
 
 def generate_scratchblocks(project):
+    """Generates all blocks in a project.
+    
+    Args:
+        project (dict): the Scratch project to process.
+        surrounding (list): list of blocks allowed to added
+    Returns:
+        A list of scripts in the project that can be turned into text.
+    """
     targets = project["targets"]
     scripts = []
 
@@ -235,9 +299,30 @@ def generate_scratchblocks(project):
     return scripts
 
 
-def generate_script(block_id, blocks):
+def generate_script(block_id, blocks, block_ids=None):
+    """Generates a script.
+    
+    Args:
+        block_id (str): the start block.
+        blocks (array-like): the list of blocks within this target.
+        block_ids (array-like) (optional): the set of block IDs that are allowed to be added.
+            If not set, then all blocks are allowed.
+    
+    Returns:
+        A dictionary with the nesting of this script as appropriate.
+    """
+
+    # If we just want everything
+    if block_ids is None:
+        block_ids = blocks
+
+    # If the current block isn't allowed, we're not adding it.
+    if block_id not in block_ids:
+        return None
+
     block = blocks[block_id]
     opcode = block["opcode"]
+
     # Format current block
     if opcode in BLOCKS:
         block_structure = BLOCKS[opcode]
@@ -254,17 +339,17 @@ def generate_script(block_id, blocks):
 
     # Handle next block
     next_block = block["next"]
-    if next_block:
-        script["next"] = generate_script(next_block, blocks)
+    if next_block in block_ids:
+        script["next"] = generate_script(next_block, blocks, block_ids)
 
     # Handle substacks
     if "SUBSTACK" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK"][1]
-        script["substack"] = generate_script(substack_id, blocks)
+        script["substack"] = generate_script(substack_id, blocks, block_ids)
 
     if "SUBSTACK2" in block["inputs"]:
         substack_id = block["inputs"]["SUBSTACK2"][1]
-        script["substack2"] = generate_script(substack_id, blocks)
+        script["substack2"] = generate_script(substack_id, blocks, block_ids)
 
     return script
 
@@ -337,6 +422,10 @@ def get_field_name(mapping, block, field_name):
 
 def block_string(scripts):
     def indent_string(block, indent):
+        # If block isn't allowed, we just ignore it.
+        if block is None:
+            return ""
+
         output = " " * indent + block["label"] + "\n"
 
         # Print substack
@@ -361,7 +450,6 @@ def block_string(scripts):
 
 
 def main():
-
     # Get Scratch project URL
     if len(sys.argv) > 2:
         sys.exit("Usage: python blocks.py SCRATCH_PROJECT_URL")
@@ -373,7 +461,7 @@ def main():
     data = get_project_from_url(url)
     if data is None:
         sys.exit("Could not download project.")
-
+    print("data", data)
     # Generate blocks
     blocks = generate_scratchblocks(data)
     text = block_string(blocks)
