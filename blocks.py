@@ -373,7 +373,7 @@ def main():
     data = get_project_from_url(url)
     if data is None:
         sys.exit("Could not download project.")
-
+    print("data", data)
     # Generate blocks
     blocks = generate_scratchblocks(data)
     text = block_string(blocks)
