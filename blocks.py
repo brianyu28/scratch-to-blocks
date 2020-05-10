@@ -137,6 +137,27 @@ BLOCKS = {
     "pen_changePenSizeBy": ("change pen size by {}", ["SIZE"]),
     "pen_setPenSizeTo": ("set pen size to {}", ["SIZE"]),
 
+    # Music
+    "music_playDrumForBeats": ("play drum ({} v) for {} beats", ["DRUM", "BEATS"]),
+    "music_restForBeats": ("rest for {} beats", ["BEATS"]),
+    "music_playNoteForBeats": ("play note ({}) for {} beats", ["NOTE", "BEATS"]), 
+    "music_setInstrument": ("set instrument to ({} v)", ["INSTRUMENT"]),
+    "music_setTempo": ("set tempo to {}", ["TEMPO"]),
+    "music_changeTempo": ("change tempo by {}", ["TEMPO"]),
+
+    # Video
+    "videoSensing_whenMotionGreaterThan": ("when video motion > {}", ["REFERENCE"]),
+    "videoSensing_videoToggle": ("turn video ({} v)", ["VIDEO_STATE"]),
+    "videoSensing_setVideoTransparency": ("set video transparency to {}", ["TRANSPARENCY"]),
+
+    # Text to Speech
+    "text2speech_speakAndWait": ("speak {}", ["WORDS"]),
+    "text2speech_setVoice": ("set voice to ({} v)", ["VOICE"]),
+    "text2speech_setLanguage": ("set language to ({} v)", ["LANGUAGE"]),
+
+    # Translate
+    "translate_getTranslate": ("translate {} to ({} v)", ["WORDS", "LANGUAGE"]),
+
 }
 
 INPUTS = {
@@ -216,6 +237,26 @@ INPUTS = {
 
     # Pen
     "pen_menu_colorParam": ("{}", [["colorParam", FIELDS]]),
+
+    # Music
+    "music_menu_DRUM": ("{}", [["DRUM", FIELDS]]),
+    "note": ("{}", [["NOTE", FIELDS]]),
+    "music_menu_INSTRUMENT": ("{}", [["INSTRUMENT", FIELDS]]),
+    "music_getTempo": ("(tempo)", []),
+
+    # Video
+    "videoSensing_menu_VIDEO_STATE": ("{}", [["VIDEO_STATE", FIELDS]]),
+    "videoSensing_videoOn": ("(video ({} v) on ({} v))", ["ATTRIBUTE", "SUBJECT"]),
+    "videoSensing_menu_ATTRIBUTE": ("{}", [["ATTRIBUTE", FIELDS]]),
+    "videoSensing_menu_SUBJECT": ("{}", [["SUBJECT", FIELDS]]),
+
+    # Text to Speech
+    "text2speech_menu_voices": ("{}", [["voices", FIELDS]]),
+    "text2speech_menu_languages": ("{}", [["languages", FIELDS]]),
+
+    # Translate
+    "translate_menu_languages": ("{}", [["languages", FIELDS]]),
+    "translate_getViewerLanguage": ("language", []),
 }
 
 
