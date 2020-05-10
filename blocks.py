@@ -125,6 +125,18 @@ BLOCKS = {
     # My Blocks
     "procedures_definition": ("define {}", ["custom_block"]),
     "procedures_call": custom_block,
+
+    # Pen
+    "pen_clear": ("erase all", []),
+    "pen_stamp": ("stamp", []),
+    "pen_penDown": ("pen down", []),
+    "pen_penUp": ("pen up", []),
+    "pen_setPenColorToColor": ("set pen color to {}", ["COLOR"]),
+    "pen_changePenColorParamBy": ("change pen ({} v) by {}", ["COLOR_PARAM", "VALUE"]),
+    "pen_setPenColorParamTo": ("set pen ({} v) to {}", ["COLOR_PARAM", "VALUE"]),
+    "pen_changePenSizeBy": ("change pen size by {}", ["SIZE"]),
+    "pen_setPenSizeTo": ("set pen size to {}", ["SIZE"]),
+
 }
 
 INPUTS = {
@@ -201,6 +213,9 @@ INPUTS = {
     "procedures_prototype": custom_block,
     "argument_reporter_boolean": ("<{}>", [["VALUE", {}]]),
     "argument_reporter_string_number": ("({})", [["VALUE", {}]]),
+
+    # Pen
+    "pen_menu_colorParam": ("{}", [["colorParam", FIELDS]]),
 }
 
 
@@ -218,7 +233,7 @@ def get_project_from_url(url):
     return res.json()
 
 
-def generate_scratchblocks(project, surrounding):
+def generate_scratchblocks(project):
     """Generates all blocks in a project.
     
     Args:
@@ -238,7 +253,7 @@ def generate_scratchblocks(project, surrounding):
                 and block["opcode"] in BLOCKS
             )
             if is_start:
-                script = generate_script(block_id, target["blocks"], surrounding)
+                script = generate_script(block_id, target["blocks"])
                 scripts.append(script)
     return scripts
 
