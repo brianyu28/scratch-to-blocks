@@ -218,12 +218,12 @@ def get_project_from_url(url):
     return res.json()
 
 
-def generate_scratchblocks(project):
+def generate_scratchblocks(project, surrounding):
     """Generates all blocks in a project.
     
     Args:
         project (dict): the Scratch project to process.
-
+        surrounding (list): list of blocks allowed to added
     Returns:
         A list of scripts in the project that can be turned into text.
     """
@@ -238,7 +238,7 @@ def generate_scratchblocks(project):
                 and block["opcode"] in BLOCKS
             )
             if is_start:
-                script = generate_script(block_id, target["blocks"])
+                script = generate_script(block_id, target["blocks"], surrounding)
                 scripts.append(script)
     return scripts
 
