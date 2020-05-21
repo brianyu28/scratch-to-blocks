@@ -81,6 +81,8 @@ BLOCKS = {
     "event_whenbackdropswitchesto": ("when backdrop switches to [{} v]", [["BACKDROP", {}]]),
     "event_whengreaterthan": ("when [{} v] > {}", [["WHENGREATERTHANMENU", FIELDS], "VALUE"]),
     "event_whenbroadcastreceived": ("when I receive [{} v]", [["BROADCAST_OPTION", {}]]),
+    "event_whenstageclicked": ("when stage clicked", []),
+
     # check these two
     "event_broadcast": ("broadcast {}", ["BROADCAST_INPUT"]),
     "event_broadcastandwait": ("broadcast {} and wait", ["BROADCAST_INPUT"]),
