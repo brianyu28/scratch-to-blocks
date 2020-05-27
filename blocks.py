@@ -138,6 +138,7 @@ BLOCKS = {
     "pen_setPenColorParamTo": ("set pen ({} v) to {}", ["COLOR_PARAM", "VALUE"]),
     "pen_changePenSizeBy": ("change pen size by {}", ["SIZE"]),
     "pen_setPenSizeTo": ("set pen size to {}", ["SIZE"]),
+    "pen_changePenHueBy": ("change pen color by {}", ["HUE"]),
 
     # Music
     "music_playDrumForBeats": ("play drum ({} v) for {} beats", ["DRUM", "BEATS"]),
