@@ -414,7 +414,7 @@ def format_block(block_id, blocks, name, inputs):
 
 
 def get_field_name(mapping, block, field_name):
-    value = block["fields"][field_name][0]
+    value = str(block["fields"][field_name][0])
     if mapping.get(value):
         return mapping.get(value)
     elif "preservecase" in mapping.get("attrs", []):
