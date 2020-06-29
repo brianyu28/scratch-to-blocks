@@ -302,7 +302,7 @@ def generate_scratchblocks(project):
     return scripts
 
 
-def generate_script(block_id, blocks, block_ids=None):
+def generate_script(block_id, blocks, block_ids=None, find_block=True):
     """Generates a script.
     
     Args:
@@ -310,6 +310,9 @@ def generate_script(block_id, blocks, block_ids=None):
         blocks (array-like): the list of blocks within this target.
         block_ids (array-like) (optional): the set of block IDs that are allowed to be added.
             If not set, then all blocks are allowed.
+        find_block (bool) (optional): whether to find the closest parent block
+            that can form a script, as when a script uses input blocks.
+            Defaults to True.
     
     Returns:
         A dictionary with the nesting of this script as appropriate.
@@ -337,6 +340,12 @@ def generate_script(block_id, blocks, block_ids=None):
         script = {
             "label": label
         }
+
+    # By default, try to get the closest parent block that can start a script
+    elif opcode in INPUTS and block["parent"] is not None and find_block:
+        block_ids.append(block["parent"])
+        return generate_script(block["parent"], blocks, block_ids)
+
     else:
         raise Exception(f"MISSING handler for {opcode}")
 
