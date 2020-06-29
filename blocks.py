@@ -191,7 +191,7 @@ INPUTS = {
     "sensing_touchingobject": ("<touching [{} v]?>", ["TOUCHINGOBJECTMENU"]),
     "sensing_touchingobjectmenu": ("{}", [["TOUCHINGOBJECTMENU", FIELDS]]),
     "sensing_touchingcolor": ("<touching color {}?>", ["COLOR"]),
-    "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR1", "COLOR2"]),
+    "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR", "COLOR2"]),
     "sensing_distanceto": ("(distance to [{} v])", ["DISTANCETOMENU"]),
     "sensing_distancetomenu": ("{}", [["DISTANCETOMENU", FIELDS]]),
     "sensing_keypressed": ("<key [{} v] pressed?>", ["KEY_OPTION"]),
