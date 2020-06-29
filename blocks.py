@@ -320,7 +320,7 @@ def generate_script(block_id, blocks, block_ids=None, find_block=True):
 
     # If we just want everything
     if block_ids is None:
-        block_ids = blocks
+        block_ids = list(blocks)
 
     # If the current block isn't allowed, we're not adding it.
     if block_id not in block_ids:
