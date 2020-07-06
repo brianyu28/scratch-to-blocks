@@ -380,8 +380,10 @@ def generate_input(input_block, blocks):
         input_value = main_input[1]
         if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
             return f"({input_value})"
-        elif input_type in [10, 11]:  # string, broadcast
+        elif input_type == 10:  # string
             return f"[{input_value}]"
+        elif input_type == 11: # broadcast
+            return f"({input_value} v)"
         elif input_type == "BOOL":
             return f"<{input_value}>"
 
