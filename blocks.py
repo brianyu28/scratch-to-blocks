@@ -154,9 +154,9 @@ BLOCKS = {
     "videoSensing_setVideoTransparency": ("set video transparency to {}", ["TRANSPARENCY"]),
 
     # Text to Speech
-    "text2speech_speakAndWait": ("speak {}:tts", ["WORDS"]),
-    "text2speech_setVoice": ("set voice to ({} v):tts", ["VOICE"]),
-    "text2speech_setLanguage": ("set language to ({} v):tts", ["LANGUAGE"]),
+    "text2speech_speakAndWait": ("speak {}::tts", ["WORDS"]),
+    "text2speech_setVoice": ("set voice to ({} v)::tts", ["VOICE"]),
+    "text2speech_setLanguage": ("set language to ({} v)::tts", ["LANGUAGE"]),
 }
 
 INPUTS = {
