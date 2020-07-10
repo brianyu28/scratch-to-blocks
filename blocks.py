@@ -154,9 +154,9 @@ BLOCKS = {
     "videoSensing_setVideoTransparency": ("set video transparency to {}", ["TRANSPARENCY"]),
 
     # Text to Speech
-    "text2speech_speakAndWait": ("speak {}", ["WORDS"]),
-    "text2speech_setVoice": ("set voice to ({} v)", ["VOICE"]),
-    "text2speech_setLanguage": ("set language to ({} v)", ["LANGUAGE"]),
+    "text2speech_speakAndWait": ("speak {}:tts", ["WORDS"]),
+    "text2speech_setVoice": ("set voice to ({} v):tts", ["VOICE"]),
+    "text2speech_setLanguage": ("set language to ({} v):tts", ["LANGUAGE"]),
 }
 
 INPUTS = {
@@ -255,8 +255,8 @@ INPUTS = {
 
     # Translate
     "translate_menu_languages": ("{}", [["languages", FIELDS]]),
-    "translate_getViewerLanguage": ("language", []),
-    "translate_getTranslate": ("translate {} to ({} v)", ["WORDS", "LANGUAGE"]),
+    "translate_getViewerLanguage": ("language::translate", []),
+    "translate_getTranslate": ("(translate {} to ({} v)::translate)", ["WORDS", "LANGUAGE"]),
 }
 
 
