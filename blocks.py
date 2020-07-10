@@ -255,7 +255,7 @@ INPUTS = {
 
     # Translate
     "translate_menu_languages": ("{}", [["languages", FIELDS]]),
-    "translate_getViewerLanguage": ("language::translate", []),
+    "translate_getViewerLanguage": ("(language::translate)", []),
     "translate_getTranslate": ("(translate {} to ({} v)::translate)", ["WORDS", "LANGUAGE"]),
 }
 
