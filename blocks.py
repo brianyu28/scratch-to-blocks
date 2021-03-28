@@ -81,6 +81,8 @@ BLOCKS = {
     "event_whenbackdropswitchesto": ("when backdrop switches to [{} v]", [["BACKDROP", {}]]),
     "event_whengreaterthan": ("when [{} v] > {}", [["WHENGREATERTHANMENU", FIELDS], "VALUE"]),
     "event_whenbroadcastreceived": ("when I receive [{} v]", [["BROADCAST_OPTION", {}]]),
+    "event_whenstageclicked": ("when stage clicked", []),
+
     # check these two
     "event_broadcast": ("broadcast {}", ["BROADCAST_INPUT"]),
     "event_broadcastandwait": ("broadcast {} and wait", ["BROADCAST_INPUT"]),
@@ -136,6 +138,7 @@ BLOCKS = {
     "pen_setPenColorParamTo": ("set pen ({} v) to {}", ["COLOR_PARAM", "VALUE"]),
     "pen_changePenSizeBy": ("change pen size by {}", ["SIZE"]),
     "pen_setPenSizeTo": ("set pen size to {}", ["SIZE"]),
+    "pen_changePenHueBy": ("change pen color by {}", ["HUE"]),
 
     # Music
     "music_playDrumForBeats": ("play drum ({} v) for {} beats", ["DRUM", "BEATS"]),
@@ -151,13 +154,9 @@ BLOCKS = {
     "videoSensing_setVideoTransparency": ("set video transparency to {}", ["TRANSPARENCY"]),
 
     # Text to Speech
-    "text2speech_speakAndWait": ("speak {}", ["WORDS"]),
-    "text2speech_setVoice": ("set voice to ({} v)", ["VOICE"]),
-    "text2speech_setLanguage": ("set language to ({} v)", ["LANGUAGE"]),
-
-    # Translate
-    "translate_getTranslate": ("translate {} to ({} v)", ["WORDS", "LANGUAGE"]),
-
+    "text2speech_speakAndWait": ("speak {}::tts", ["WORDS"]),
+    "text2speech_setVoice": ("set voice to ({} v)::tts", ["VOICE"]),
+    "text2speech_setLanguage": ("set language to ({} v)::tts", ["LANGUAGE"]),
 }
 
 INPUTS = {
@@ -188,7 +187,7 @@ INPUTS = {
     "sensing_touchingobject": ("<touching [{} v]?>", ["TOUCHINGOBJECTMENU"]),
     "sensing_touchingobjectmenu": ("{}", [["TOUCHINGOBJECTMENU", FIELDS]]),
     "sensing_touchingcolor": ("<touching color {}?>", ["COLOR"]),
-    "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR1", "COLOR2"]),
+    "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR", "COLOR2"]),
     "sensing_distanceto": ("(distance to [{} v])", ["DISTANCETOMENU"]),
     "sensing_distancetomenu": ("{}", [["DISTANCETOMENU", FIELDS]]),
     "sensing_keypressed": ("<key [{} v] pressed?>", ["KEY_OPTION"]),
@@ -256,7 +255,8 @@ INPUTS = {
 
     # Translate
     "translate_menu_languages": ("{}", [["languages", FIELDS]]),
-    "translate_getViewerLanguage": ("language", []),
+    "translate_getViewerLanguage": ("(language::translate)", []),
+    "translate_getTranslate": ("(translate {} to ({} v)::translate)", ["WORDS", "LANGUAGE"]),
 }
 
 
@@ -299,7 +299,7 @@ def generate_scratchblocks(project):
     return scripts
 
 
-def generate_script(block_id, blocks, block_ids=None):
+def generate_script(block_id, blocks, block_ids=None, find_block=True):
     """Generates a script.
     
     Args:
@@ -307,6 +307,9 @@ def generate_script(block_id, blocks, block_ids=None):
         blocks (array-like): the list of blocks within this target.
         block_ids (array-like) (optional): the set of block IDs that are allowed to be added.
             If not set, then all blocks are allowed.
+        find_block (bool) (optional): whether to find the closest parent block
+            that can form a script, as when a script uses input blocks.
+            Defaults to True.
     
     Returns:
         A dictionary with the nesting of this script as appropriate.
@@ -314,7 +317,7 @@ def generate_script(block_id, blocks, block_ids=None):
 
     # If we just want everything
     if block_ids is None:
-        block_ids = blocks
+        block_ids = list(blocks)
 
     # If the current block isn't allowed, we're not adding it.
     if block_id not in block_ids:
@@ -334,6 +337,12 @@ def generate_script(block_id, blocks, block_ids=None):
         script = {
             "label": label
         }
+
+    # By default, try to get the closest parent block that can start a script
+    elif opcode in INPUTS and block["parent"] is not None and find_block:
+        block_ids.append(block["parent"])
+        return generate_script(block["parent"], blocks, block_ids)
+
     else:
         raise Exception(f"MISSING handler for {opcode}")
 
@@ -368,8 +377,10 @@ def generate_input(input_block, blocks):
         input_value = main_input[1]
         if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
             return f"({input_value})"
-        elif input_type in [10, 11]:  # string, broadcast
+        elif input_type == 10:  # string
             return f"[{input_value}]"
+        elif input_type == 11: # broadcast
+            return f"({input_value} v)"
         elif input_type == "BOOL":
             return f"<{input_value}>"
 
@@ -411,7 +422,7 @@ def format_block(block_id, blocks, name, inputs):
 
 
 def get_field_name(mapping, block, field_name):
-    value = block["fields"][field_name][0]
+    value = str(block["fields"][field_name][0])
     if mapping.get(value):
         return mapping.get(value)
     elif "preservecase" in mapping.get("attrs", []):
