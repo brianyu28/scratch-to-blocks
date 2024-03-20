@@ -269,8 +269,12 @@ def get_project_from_url(url):
         return None
     project_id = match.group(1)
 
+    # Query for project details
+    res = requests.get(f"https://api.scratch.mit.edu/projects/{project_id}")
+    token = res.json()["project_token"]
+
     # Query for project JSON
-    res = requests.get(f"https://projects.scratch.mit.edu/{project_id}")
+    res = requests.get(f"https://projects.scratch.mit.edu/{project_id}?token={token}")
     return res.json()
 
 
