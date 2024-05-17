@@ -176,7 +176,7 @@ INPUTS = {
     "looks_size": ("(size)", []),
 
     # Sound
-    "sound_sounds_menu": ("({} v)", [["SOUND_MENU", {"attrs": ["preservecase"]}]]),
+    "sound_sounds_menu": ("[{} v]", [["SOUND_MENU", {"attrs": ["preservecase"]}]]),
     "sound_volume": ("(volume)", []),
 
     # Control -- check this block
