@@ -216,7 +216,7 @@ INPUTS = {
     "operator_or": ("<{} or {}>", ["OPERAND1", "OPERAND2"]),
     "operator_not": ("<not {}>", ["OPERAND"]),
     "operator_join": ("(join {} {})", ["STRING1", "STRING2"]),
-    "operator_letter_of": ("(letter {} of {}", ["LETTER", "STRING"]),
+    "operator_letter_of": ("(letter {} of {})", ["LETTER", "STRING"]),
     "operator_length": ("(length of {})", ["STRING"]),
     "operator_contains": ("< {} contains {}?>", ["STRING1", "STRING2"]),
     "operator_mod": ("({} mod {})", ["NUM1", "NUM2"]),
