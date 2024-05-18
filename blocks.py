@@ -274,7 +274,7 @@ def get_project_from_url(url):
     return res.json()
 
 
-def generate_scratchblocks(project):
+def generate_scratchblocks(project, load_project=True):
     """Generates all blocks in a project.
     
     Args:
@@ -283,7 +283,11 @@ def generate_scratchblocks(project):
     Returns:
         A list of scripts in the project that can be turned into text.
     """
-    targets = project["targets"]
+    if load_project:
+        targets = project["targets"] #all sprites
+    else:
+        targets = [project] #only one sprite
+
     scripts = []
 
     # Check each target for a new script
