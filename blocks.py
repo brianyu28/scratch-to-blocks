@@ -369,27 +369,32 @@ def generate_script(block_id, blocks, block_ids=None, find_block=True):
 
 def generate_input(input_block, blocks):
     """Generate input based on the value of INPUTS for a block."""
-    main_input = input_block[1]
+    try:
+        main_input = input_block[1]
 
-    # Handle inputs that are references to other blocks
-    if isinstance(main_input, str):
-        return generate_input_block(main_input, blocks)
+        # Handle inputs that are references to other blocks
+        if isinstance(main_input, str):
+            return generate_input_block(main_input, blocks)
 
-    # Handle inputs that do not refer to other blocks
-    elif isinstance(main_input, list):
-        input_type = main_input[0]
-        input_value = main_input[1]
-        if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
-            return f"({input_value})"
-        elif input_type == 10:  # string
-            return f"[{input_value}]"
-        elif input_type == 11: # broadcast
-            return f"({input_value} v)"
-        elif input_type == "BOOL":
-            return f"<{input_value}>"
+        # Handle inputs that do not refer to other blocks
+        elif isinstance(main_input, list):
+            input_type = main_input[0]
+            input_value = main_input[1]
+            if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
+                return f"({input_value})"
+            elif input_type == 10:  # string
+                return f"[{input_value}]"
+            elif input_type == 11: # broadcast
+                return f"({input_value} v)"
+            elif input_type == "BOOL":
+                return f"<{input_value}>"
 
-    else:
-        raise Exception(f"Missing handler for input type {type(main_input)}")
+        else:
+            raise Exception(f"Missing handler for input type {type(main_input)}")
+    except IndexError:
+        pass
+
+
 
 
 def generate_input_block(block_id, blocks):
@@ -415,7 +420,10 @@ def format_block(block_id, blocks, name, inputs):
     args = []
     for input_name in inputs:
         if isinstance(input_name, str):
-            arg = generate_input(block["inputs"][input_name], blocks)
+            try:
+                arg = generate_input(block["inputs"][input_name], blocks)
+            except KeyError: #empty input
+                arg = generate_input("", blocks)
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
@@ -455,7 +463,7 @@ def block_string(scripts):
         if "next" in block:
             output += indent_string(block["next"], indent)
 
-        return output
+        return output.replace('%n',"[]")
 
     output = ""
     for script in scripts:
