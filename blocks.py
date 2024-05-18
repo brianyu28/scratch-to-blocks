@@ -364,7 +364,7 @@ def generate_script(block_id, blocks, block_ids=None, find_block=True):
         substack_id = block["inputs"]["SUBSTACK2"][1]
         script["substack2"] = generate_script(substack_id, blocks, block_ids)
 
-    return script
+    return script.replace('%n',"[]")
 
 
 def generate_input(input_block, blocks):
@@ -463,7 +463,7 @@ def block_string(scripts):
         if "next" in block:
             output += indent_string(block["next"], indent)
 
-        return output.replace('%n',"[]")
+        return output
 
     output = ""
     for script in scripts:
