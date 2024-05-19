@@ -430,7 +430,10 @@ def format_block(block_id, blocks, name, inputs):
             args.append(get_field_name(mapping, block, field_name))
         else:
             raise Exception(f"unsupported block type {type(input_name)}")
-    return name.format(*args).replace('%n',"[]")
+    result=name.format(*args)
+    if "%n" in result:
+        raise RuntimeError("Weird block syntax")
+    return result
 
 
 def get_field_name(mapping, block, field_name):
