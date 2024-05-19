@@ -422,7 +422,7 @@ def format_block(block_id, blocks, name, inputs):
         if isinstance(input_name, str):
             try:
                 arg = generate_input(block["inputs"][input_name], blocks)
-            except KeyError: #empty input
+            except KeyError: #empty input = %n
                 arg = generate_input("", blocks)
             args.append(arg)
         elif isinstance(input_name, list):
@@ -430,7 +430,7 @@ def format_block(block_id, blocks, name, inputs):
             args.append(get_field_name(mapping, block, field_name))
         else:
             raise Exception(f"unsupported block type {type(input_name)}")
-    return name.format(*args)
+    return name.format(*args).replace('%n',"[]")
 
 
 def get_field_name(mapping, block, field_name):
