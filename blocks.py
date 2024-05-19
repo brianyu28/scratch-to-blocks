@@ -190,7 +190,7 @@ INPUTS = {
     "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR", "COLOR2"]),
     "sensing_distanceto": ("(distance to [{} v])", ["DISTANCETOMENU"]),
     "sensing_distancetomenu": ("{}", [["DISTANCETOMENU", FIELDS]]),
-    "sensing_keypressed": ("<key [{} v] pressed?>", ["KEY_OPTION"]),
+    "sensing_keypressed": ("<key ({} v) pressed?>", ["KEY_OPTION"]),
     "sensing_keyoptions": ("{}", [["KEY_OPTION", FIELDS]]),
     "sensing_mousex": ("(mouse x)", []),
     "sensing_mousey": ("(mouse y)", []),
@@ -469,7 +469,7 @@ def block_string(scripts):
     for script in scripts:
         output += indent_string(script, 0)
         output += "\n"
-    return output.replace('%n',"[]")
+    return output
 
 
 def main():
