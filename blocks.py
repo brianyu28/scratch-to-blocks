@@ -432,7 +432,7 @@ def format_block(block_id, blocks, name, inputs):
             raise Exception(f"unsupported block type {type(input_name)}")
     result=name.format(*args)
     if "%n" in result:
-        raise RuntimeError("Weird block syntax")
+        raise RuntimeError("weird things")
     return result
 
 
