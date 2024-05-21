@@ -11,12 +11,12 @@ OPEN_IN_BROWSER = True
 
 def custom_block(block):
     """Formatting for a custom My Block"""
-    proccode = block["mutation"]["proccode"].replace("%s", "{}").replace("%b", "{}")
+    proccode = block["mutation"]["proccode"].replace("%s", "{}").replace("%b", "{}").replace("%n", "{}") #test
     placeholders = re.findall("%[sb]", block["mutation"]["proccode"])
     inputs = json.loads(block["mutation"]["argumentids"])
     for i, input_id in enumerate(inputs):
         if input_id not in block["inputs"]:
-            block["inputs"][input_id] = [1, [10, ""]] if placeholders[i] == "%s" else [1, ["BOOL", ""]]
+            block["inputs"][input_id] = [1, [10, ""]] if placeholders[i] in ["%s"] else [1, ["BOOL", ""]] #test
     return proccode, inputs
 
 
@@ -142,6 +142,7 @@ BLOCKS = {
     "pen_setPenSizeTo": ("set pen size to {}", ["SIZE"]),
     "pen_changePenHueBy": ("change pen color by {}", ["HUE"]),
     "pen_setPenShadeToNumber": ("set pen shade to {}", ["SHADE"]),
+    "pen_changePenShadeBy": ("change pen shade by {}", ["SHADE"]),
 
     # Music
     "music_playDrumForBeats": ("play drum ({} v) for {} beats", ["DRUM", "BEATS"]),
