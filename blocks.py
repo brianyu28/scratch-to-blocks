@@ -141,6 +141,7 @@ BLOCKS = {
     "pen_changePenSizeBy": ("change pen size by {}", ["SIZE"]),
     "pen_setPenSizeTo": ("set pen size to {}", ["SIZE"]),
     "pen_changePenHueBy": ("change pen color by {}", ["HUE"]),
+    "pen_setPenShadeToNumber": ("set pen shade to {}", ["SHADE"]),
 
     # Music
     "music_playDrumForBeats": ("play drum ({} v) for {} beats", ["DRUM", "BEATS"]),
@@ -395,6 +396,8 @@ def generate_input(input_block, blocks):
                 return f"<{input_value}>"
 
         else:
+            if main_input==None:
+                raise RuntimeError(f"Error on input: {input_value}")
             raise Exception(f"Missing handler for input type {type(main_input)}")
     except IndexError:
         pass
@@ -415,6 +418,8 @@ def generate_input_block(block_id, blocks):
         input_block = format_block(block_id, blocks, name, inputs)
         return input_block
     else:
+        if opcode==None:
+            return ""
         raise Exception(f"Missing handler for input {opcode}")
 
 
