@@ -100,7 +100,8 @@ BLOCKS = {
     "control_create_clone_of": ("create clone of {}", ["CLONE_OPTION"]),
     "control_delete_this_clone": ("delete this clone", []),
     "control_wait_until": ("wait until {}", ["CONDITION"]),
-
+    "control_for_each": ("for each [{} v] in {}", [["VARIABLE", FIELDS],"VALUE"]),
+    "control_while": ("while {}", ["CONDITION"]),
 
     # Sensing
     "sensing_askandwait": ("ask {} and wait", ["QUESTION"]),
@@ -330,6 +331,9 @@ def generate_script(block_id, blocks, block_ids=None, find_block=True):
 
     block = blocks[block_id]
     opcode = block["opcode"]
+
+    """if opcode=="control_for_each":
+        print(block)"""
 
     # Format current block
     if opcode in BLOCKS:
