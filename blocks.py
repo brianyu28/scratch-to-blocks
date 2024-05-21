@@ -53,6 +53,7 @@ BLOCKS = {
     "looks_switchcostumeto": ("switch costume to {}", ["COSTUME"]),
     "looks_nextcostume": ("next costume", []),
     "looks_switchbackdropto": ("switch backdrop to {}", ["BACKDROP"]),
+    "looks_switchbackdroptoandwait": ("switch backdrop to {} and wait", ["BACKDROP"]),
     "looks_nextbackdrop": ("next backdrop", []),
     "looks_changesizeby": ("change size by {}", ["CHANGE"]),
     "looks_setsizeto": ("set size to {} %", ["SIZE"]),
