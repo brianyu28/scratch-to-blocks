@@ -297,10 +297,13 @@ def generate_scratchblocks(project, load_project=True):
     # Check each target for a new script
     for target in targets:
         for block_id, block in target["blocks"].items():
-            is_start = (
-                isinstance(block, dict) and block["parent"] is None
-                and block["opcode"] in BLOCKS
-            )
+            try:
+                is_start = (
+                    isinstance(block, dict) and block["parent"] is None
+                    and block["opcode"] in BLOCKS
+                )
+            except KeyError: #no parent 😭
+                is_start = False
             if is_start:
                 script = generate_script(block_id, target["blocks"])
                 scripts.append(script)
@@ -435,8 +438,8 @@ def format_block(block_id, blocks, name, inputs):
         if isinstance(input_name, str):
             try:
                 arg = generate_input(block["inputs"][input_name], blocks)
-            except KeyError: #empty input = %n
-                raise RuntimeError("Empty input.")
+            except KeyError: #empty input
+                return ""#raise RuntimeError(f"Empty input in {block}.")
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
