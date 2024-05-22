@@ -374,6 +374,10 @@ def generate_script(block_id, blocks, block_ids=None, find_block=True):
     return script
 
 
+def format_input(input):
+    return input.replace("[","\\[").replace("]","\\]").replace("(","\\(").replace(")","\\)")
+
+
 def generate_input(input_block, blocks):
     """Generate input based on the value of INPUTS for a block."""
     try:
@@ -386,7 +390,7 @@ def generate_input(input_block, blocks):
         # Handle inputs that do not refer to other blocks
         elif isinstance(main_input, list):
             input_type = main_input[0]
-            input_value = main_input[1].replace("[","\\[").replace("]","\\]").replace("(","\\(").replace(")","\\)")
+            input_value = format_input(str(main_input[1]))
             if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
                 return f"({input_value})"
             elif input_type == 10:  # string
@@ -402,8 +406,6 @@ def generate_input(input_block, blocks):
             raise Exception(f"Missing handler for input type {type(main_input)}")
     except IndexError:
         pass
-
-
 
 
 def generate_input_block(block_id, blocks):
@@ -434,11 +436,11 @@ def format_block(block_id, blocks, name, inputs):
             try:
                 arg = generate_input(block["inputs"][input_name], blocks)
             except KeyError: #empty input = %n
-                arg = generate_input("", blocks)
+                raise RuntimeError("Empty input.")
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
-            args.append(get_field_name(mapping, block, field_name))
+            args.append(format_input(get_field_name(mapping, block, field_name)))
         else:
             raise Exception(f"unsupported block type {type(input_name)}")
     result=name.format(*args)
