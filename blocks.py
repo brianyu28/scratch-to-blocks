@@ -386,7 +386,7 @@ def generate_input(input_block, blocks):
         # Handle inputs that do not refer to other blocks
         elif isinstance(main_input, list):
             input_type = main_input[0]
-            input_value = main_input[1]
+            input_value = main_input[1].replace("[","\\[").replace("]","\\]").replace("(","\\(").replace(")","\\)")
             if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
                 return f"({input_value})"
             elif input_type == 10:  # string
@@ -398,7 +398,7 @@ def generate_input(input_block, blocks):
 
         else:
             if main_input==None:
-                raise RuntimeError(f"Error on input: {input_value}")
+                return ""#raise RuntimeError(f"Error on input of block: {blocks}")
             raise Exception(f"Missing handler for input type {type(main_input)}")
     except IndexError:
         pass
