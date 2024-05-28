@@ -11,12 +11,12 @@ OPEN_IN_BROWSER = True
 
 def custom_block(block):
     """Formatting for a custom My Block"""
-    proccode = block["mutation"]["proccode"].replace("%s", "{}").replace("%b", "{}")
+    proccode = block["mutation"]["proccode"].replace("%s", "{}").replace("%b", "{}").replace("%n", "{}") #test
     placeholders = re.findall("%[sb]", block["mutation"]["proccode"])
     inputs = json.loads(block["mutation"]["argumentids"])
     for i, input_id in enumerate(inputs):
         if input_id not in block["inputs"]:
-            block["inputs"][input_id] = [1, [10, ""]] if placeholders[i] == "%s" else [1, ["BOOL", ""]]
+            block["inputs"][input_id] = [1, [10, ""]] if placeholders[i] in ["%s"] else [1, ["BOOL", ""]] #test
     return proccode, inputs
 
 
@@ -53,6 +53,7 @@ BLOCKS = {
     "looks_switchcostumeto": ("switch costume to {}", ["COSTUME"]),
     "looks_nextcostume": ("next costume", []),
     "looks_switchbackdropto": ("switch backdrop to {}", ["BACKDROP"]),
+    "looks_switchbackdroptoandwait": ("switch backdrop to {} and wait", ["BACKDROP"]),
     "looks_nextbackdrop": ("next backdrop", []),
     "looks_changesizeby": ("change size by {}", ["CHANGE"]),
     "looks_setsizeto": ("set size to {} %", ["SIZE"]),
@@ -99,7 +100,8 @@ BLOCKS = {
     "control_create_clone_of": ("create clone of {}", ["CLONE_OPTION"]),
     "control_delete_this_clone": ("delete this clone", []),
     "control_wait_until": ("wait until {}", ["CONDITION"]),
-
+    "control_for_each": ("for each [{} v] in {}", [["VARIABLE", FIELDS],"VALUE"]),
+    "control_while": ("while {}", ["CONDITION"]),
 
     # Sensing
     "sensing_askandwait": ("ask {} and wait", ["QUESTION"]),
@@ -139,6 +141,8 @@ BLOCKS = {
     "pen_changePenSizeBy": ("change pen size by {}", ["SIZE"]),
     "pen_setPenSizeTo": ("set pen size to {}", ["SIZE"]),
     "pen_changePenHueBy": ("change pen color by {}", ["HUE"]),
+    "pen_setPenShadeToNumber": ("set pen shade to {}", ["SHADE"]),
+    "pen_changePenShadeBy": ("change pen shade by {}", ["SHADE"]),
 
     # Music
     "music_playDrumForBeats": ("play drum ({} v) for {} beats", ["DRUM", "BEATS"]),
@@ -184,13 +188,13 @@ INPUTS = {
 
     # Sensing
     "sensing_mousedown": ("<mouse down?>", []),
-    "sensing_touchingobject": ("<touching [{} v]?>", ["TOUCHINGOBJECTMENU"]),
+    "sensing_touchingobject": ("<touching ({} v)?>", ["TOUCHINGOBJECTMENU"]),
     "sensing_touchingobjectmenu": ("{}", [["TOUCHINGOBJECTMENU", FIELDS]]),
     "sensing_touchingcolor": ("<touching color {}?>", ["COLOR"]),
     "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR", "COLOR2"]),
     "sensing_distanceto": ("(distance to [{} v])", ["DISTANCETOMENU"]),
     "sensing_distancetomenu": ("{}", [["DISTANCETOMENU", FIELDS]]),
-    "sensing_keypressed": ("<key [{} v] pressed?>", ["KEY_OPTION"]),
+    "sensing_keypressed": ("<key ({} v) pressed?>", ["KEY_OPTION"]),
     "sensing_keyoptions": ("{}", [["KEY_OPTION", FIELDS]]),
     "sensing_mousex": ("(mouse x)", []),
     "sensing_mousey": ("(mouse y)", []),
@@ -278,7 +282,7 @@ def get_project_from_url(url):
     return res.json()
 
 
-def generate_scratchblocks(project):
+def generate_scratchblocks(project, load_project=True):
     """Generates all blocks in a project.
     
     Args:
@@ -287,16 +291,23 @@ def generate_scratchblocks(project):
     Returns:
         A list of scripts in the project that can be turned into text.
     """
-    targets = project["targets"]
+    if load_project:
+        targets = project["targets"] #all sprites
+    else:
+        targets = [project] #only one sprite
+
     scripts = []
 
     # Check each target for a new script
     for target in targets:
         for block_id, block in target["blocks"].items():
-            is_start = (
-                isinstance(block, dict) and block["parent"] is None
-                and block["opcode"] in BLOCKS
-            )
+            try:
+                is_start = (
+                    isinstance(block, dict) and block["parent"] is None
+                    and block["opcode"] in BLOCKS
+                )
+            except KeyError: #no parent 😭
+                is_start = False
             if is_start:
                 script = generate_script(block_id, target["blocks"])
                 scripts.append(script)
@@ -329,6 +340,9 @@ def generate_script(block_id, blocks, block_ids=None, find_block=True):
 
     block = blocks[block_id]
     opcode = block["opcode"]
+
+    """if opcode=="control_for_each":
+        print(block)"""
 
     # Format current block
     if opcode in BLOCKS:
@@ -367,29 +381,38 @@ def generate_script(block_id, blocks, block_ids=None, find_block=True):
     return script
 
 
+def format_input(input):
+    return input.replace("[","\\[").replace("]","\\]").replace("(","\\(").replace(")","\\)")
+
+
 def generate_input(input_block, blocks):
     """Generate input based on the value of INPUTS for a block."""
-    main_input = input_block[1]
+    try:
+        main_input = input_block[1]
 
-    # Handle inputs that are references to other blocks
-    if isinstance(main_input, str):
-        return generate_input_block(main_input, blocks)
+        # Handle inputs that are references to other blocks
+        if isinstance(main_input, str):
+            return generate_input_block(main_input, blocks)
 
-    # Handle inputs that do not refer to other blocks
-    elif isinstance(main_input, list):
-        input_type = main_input[0]
-        input_value = main_input[1]
-        if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
-            return f"({input_value})"
-        elif input_type == 10:  # string
-            return f"[{input_value}]"
-        elif input_type == 11: # broadcast
-            return f"({input_value} v)"
-        elif input_type == "BOOL":
-            return f"<{input_value}>"
+        # Handle inputs that do not refer to other blocks
+        elif isinstance(main_input, list):
+            input_type = main_input[0]
+            input_value = format_input(str(main_input[1]))
+            if input_type in [4, 5, 6, 7, 8, 9, 12, 13]:  # number, variable
+                return f"({input_value})"
+            elif input_type == 10:  # string
+                return f"[{input_value}]"
+            elif input_type == 11: # broadcast
+                return f"({input_value} v)"
+            elif input_type == "BOOL":
+                return f"<{input_value}>"
 
-    else:
-        raise Exception(f"Missing handler for input type {type(main_input)}")
+        else:
+            if main_input==None:
+                return ""#raise RuntimeError(f"Error on input of block: {blocks}")
+            raise Exception(f"Missing handler for input type {type(main_input)}")
+    except IndexError:
+        pass
 
 
 def generate_input_block(block_id, blocks):
@@ -405,6 +428,8 @@ def generate_input_block(block_id, blocks):
         input_block = format_block(block_id, blocks, name, inputs)
         return input_block
     else:
+        if opcode==None:
+            return ""
         raise Exception(f"Missing handler for input {opcode}")
 
 
@@ -415,14 +440,20 @@ def format_block(block_id, blocks, name, inputs):
     args = []
     for input_name in inputs:
         if isinstance(input_name, str):
-            arg = generate_input(block["inputs"][input_name], blocks)
+            try:
+                arg = generate_input(block["inputs"][input_name], blocks)
+            except KeyError: #empty input
+                return ""#raise RuntimeError(f"Empty input in {block}.")
             args.append(arg)
         elif isinstance(input_name, list):
             field_name, mapping = input_name
-            args.append(get_field_name(mapping, block, field_name))
+            args.append(format_input(get_field_name(mapping, block, field_name)))
         else:
             raise Exception(f"unsupported block type {type(input_name)}")
-    return name.format(*args)
+    result=name.format(*args)
+    if "%n" in result:
+        raise RuntimeError("weird things")
+    return result
 
 
 def get_field_name(mapping, block, field_name):
