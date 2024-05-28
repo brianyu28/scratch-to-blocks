@@ -188,7 +188,7 @@ INPUTS = {
 
     # Sensing
     "sensing_mousedown": ("<mouse down?>", []),
-    "sensing_touchingobject": ("<touching [{} v]?>", ["TOUCHINGOBJECTMENU"]),
+    "sensing_touchingobject": ("<touching ({} v)?>", ["TOUCHINGOBJECTMENU"]),
     "sensing_touchingobjectmenu": ("{}", [["TOUCHINGOBJECTMENU", FIELDS]]),
     "sensing_touchingcolor": ("<touching color {}?>", ["COLOR"]),
     "sensing_coloristouchingcolor": ("<color {} is touching {}?>", ["COLOR", "COLOR2"]),
